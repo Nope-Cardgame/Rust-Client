@@ -1,5 +1,5 @@
 [package]
-name = "Rust-Client"
+name = "rust-client"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 rust_socketio = "0.2.4"
 serde_json = "1.0.95"
+jsonwebtoken = "8.3.0"
