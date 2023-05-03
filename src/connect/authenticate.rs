@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+
 use reqwest;
 use dotenvy;
 use std::error::Error;
@@ -16,7 +16,7 @@ pub struct Token {
     pub jsonwebtoken: String,
 }
 
-
+/// signs in user onto nope server
 pub async fn sign_in() -> Result<String, Box<dyn Error>>{
     let client = reqwest::Client::new();
 
@@ -31,12 +31,12 @@ pub async fn sign_in() -> Result<String, Box<dyn Error>>{
         .send()
         .await?;
 
-    // println!("response = {:#?}", &res);
     let jsontoken = res.json::<Token>().await?;
 
     Ok(jsontoken.jsonwebtoken)
 }
 
+/// signs up user with nope server
 pub async fn sign_up() -> Result<String, Box<dyn Error>>{
 
     let client = reqwest::Client::new();
@@ -51,8 +51,6 @@ pub async fn sign_up() -> Result<String, Box<dyn Error>>{
         .json(&login)
         .send()
         .await?;
-
-    // println!("response = {:#?}", res);
 
     let jsontoken = res.json::<Token>().await?;
 
