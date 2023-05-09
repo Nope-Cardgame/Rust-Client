@@ -3,12 +3,15 @@ mod connect;
 use dotenvy::dotenv;
 use std::{time};
 use std::thread::sleep;
+use std::time::Duration;
 use crate::connect::authenticate;
-use rust_socketio::{Payload, {asynchronous::{ClientBuilder, Client}}, RawClient};
+use rust_socketio::{Payload, ClientBuilder, RawClient, SocketBuilder};
 use serde_json::{json, Value};
 use serde::{Deserialize, Serialize};
 use futures_util::FutureExt;
-use crate::connect::connect::get_user_connections;
+use jsonwebtoken::crypto::sign;
+use crate::connect::connect::{create_game, upgrade_socket};
+
 
 #[derive( Debug, Deserialize, Serialize)]
 pub struct Authtoken {
@@ -20,8 +23,7 @@ pub struct Token {
     pub jsonwebtoken: String
 }
 
-#[tokio::main]
-async fn main() {
+fn main() {
     dotenv().ok();
 
     // create empty Token object holding the JWT
@@ -30,54 +32,40 @@ async fn main() {
     };
 
     // try to sign up to server
-    let mut jsontoken = authenticate::sign_up().await;
+    let mut jsontoken = authenticate::sign_up();
+    let test = authenticate::sign_in();
 
     // if signup failed try to log in 5 times
     let mut counter = 0;
-    while jsontoken.is_err() && counter < 5{
-        jsontoken = authenticate::sign_in().await;
+    while jsontoken.is_err() && counter < 1{
+        jsontoken = authenticate::sign_in();
         if jsontoken.is_err() {
             counter += 1;
             sleep(time::Duration::from_secs(5));
-        };
+        }
     };
 
     // only proceed if JWT was received successfully
     if jsontoken.is_ok() {
         jsontkn.jsonwebtoken = jsontoken.unwrap();
 
+        // connect::connect::get_user_connections(&jsontkn).await;
 
+        let mut socket = upgrade_socket(&jsontkn);
 
-        // get_user_connections(&jsontkn).await;
+        let connectedusers = connect::connect::get_user_connections(&jsontkn);
 
-        let callback = |payload: Payload, socket: Client| {
-            println!("inside callback");
-            async move {
-                match payload {
-                    Payload::String(str) => println!("Received: {}", str),
-                    Payload::Binary(bin_data) => println!("Received bytes: {:#?}", bin_data),
+        create_game(&jsontkn, Some(false), Some(false), Some(false));
 
-                }
-                socket
-                    .emit("test", json!({"got ack": true}))
-                    .await
-                    .expect("Server unreachable");
+        let mut count = 0;
+        loop {
+            // socket.
+            sleep(Duration::from_secs(1));
+            count += 1;
+            if count == 30 {
+                break
             }
-                .boxed()
-        };
-
-        let mut authContent = "Bearer ".to_owned() + &jsontkn.jsonwebtoken;
-        let mut socket = ClientBuilder::new(dotenvy::var("BASE_URL").expect("error in auth: "))
-            // let socket = ClientBuilder::new("https://nopecardgame.requestcatcher.com/")
-            .opening_header("Authorization", &*authContent)
-            .on("connect", callback)
-            .connect()
-            .await
-            .expect("Connection failed");
-
-        socket.emit("auth", &*authContent);
+        }
+        let disconnect = socket.disconnect();
     }
-
-
-
 }

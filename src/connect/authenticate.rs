@@ -1,5 +1,5 @@
-
 use reqwest;
+use std::time::Duration;
 use dotenvy;
 use std::error::Error;
 use serde_json::{Value, json};
@@ -17,43 +17,40 @@ pub struct Token {
 }
 
 /// signs in user onto nope server
-pub async fn sign_in() -> Result<String, Box<dyn Error>>{
-    let client = reqwest::Client::new();
+pub fn sign_in() -> Result<String, Box<dyn Error>>{
+    let client = reqwest::blocking::Client::new();
 
     let login = Body {
-        username: dotenvy::var("AUTH_PASS").expect("no AUTH_PASS in .env").into(),
-        password: dotenvy::var("AUTH_USER").expect("no AUTH_USER in .env").into(),
+        username: dotenvy::var("AUTH_USER").expect("no AUTH_USER in .env").into(),
+        password: dotenvy::var("AUTH_PASS").expect("no AUTH_PASS in .env").into(),
     };
 
     let res = client
         .post(dotenvy::var("AUTH_URL").expect("error in auth: "))
         .json(&login)
-        .send()
-        .await?;
+        .send();
 
-    let jsontoken = res.json::<Token>().await?;
+    let jsontoken = res.unwrap().json::<Token>();
 
-    Ok(jsontoken.jsonwebtoken)
+    Ok(jsontoken?.jsonwebtoken)
 }
 
 /// signs up user with nope server
-pub async fn sign_up() -> Result<String, Box<dyn Error>>{
+pub fn sign_up() -> Result<String, Box<dyn Error>>{
 
-    let client = reqwest::Client::new();
+    let client = reqwest::blocking::Client::new();
 
     let login = Body {
-        username: dotenvy::var("AUTH_PASS").expect("no AUTH_PASS in .env").into(),
-        password: dotenvy::var("AUTH_USER").expect("no AUTH_USER in .env").into(),
+        username: dotenvy::var("AUTH_USER").expect("no AUTH_USER in .env").into(),
+        password: dotenvy::var("AUTH_PASS").expect("no AUTH_PASS in .env").into(),
     };
 
     let res = client
         .post(dotenvy::var("SIGN_URL").expect("error in auth: "))
         .json(&login)
-        .send()
-        .await?;
+        .send();
 
-    let jsontoken = res.json::<Token>().await?;
+    let jsontoken = res.unwrap().json::<Token>();
 
-    Ok(jsontoken.jsonwebtoken)
-
+    Ok(jsontoken?.jsonwebtoken)
 }
