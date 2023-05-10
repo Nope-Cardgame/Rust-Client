@@ -4,16 +4,12 @@ use dotenvy;
 use std::error::Error;
 use serde_json::{Value, json};
 use serde::{Deserialize, Serialize};
+use crate::Token;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Body {
     username: String,
     password: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Token {
-    pub jsonwebtoken: String,
 }
 
 /// signs in user onto nope server

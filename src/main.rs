@@ -12,18 +12,13 @@ use futures_util::FutureExt;
 use jsonwebtoken::crypto::sign;
 use crate::connect::connect::{create_game, upgrade_socket};
 
-
-#[derive( Debug, Deserialize, Serialize)]
-pub struct Authtoken {
-    pub auth: Value
-}
-
 #[derive( Debug, Deserialize, Serialize)]
 pub struct Token {
     pub jsonwebtoken: String
 }
 
 fn main() {
+    // load all environment variables from .env file
     dotenv().ok();
 
     // create empty Token object holding the JWT
@@ -55,7 +50,7 @@ fn main() {
 
         let connectedusers = connect::connect::get_user_connections(&jsontkn);
 
-        // create_game(&jsontkn, Some(false), Some(false), Some(false));
+        create_game(&jsontkn, Some(false), Some(false), Some(false));
 
         let mut count = 0;
         loop {
