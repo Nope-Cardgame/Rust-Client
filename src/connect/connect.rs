@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use rust_socketio;
 use rust_socketio::{ClientBuilder, Payload, RawClient};
 use serde_json::json;
+use crate::connect::event_callbacks::{eliminatedCallback, gameEndCallback, gameInviteCallback, gameStateCallback, tournamentInviteCallback, tournemEndCallback};
 use crate::logic::game_objects::Game;
 use crate::Token;
 
@@ -55,19 +56,17 @@ pub fn get_user_connections(token: &Token) -> Result<ConnectedPlayers, Box<dyn E
 
 /// takes given JWT and tries to upgrade to websocket connection
 pub fn upgrade_socket(token: &Token) -> rust_socketio::client::Client {
-    let connect_callback = |payload: Payload, socket: RawClient| {
-        match payload {
-            Payload::String(str) => println!("Received: {}", str),
-            Payload::Binary(bin_data) => println!("Received bytes: {:#?}", bin_data),
-        }
-        socket.emit("test", json!({"got ack": true})).expect("Server unreachable")
-    };
 
+    //
     let mut socket = ClientBuilder::new(dotenvy::var("BASE_URL").expect("error in auth: "))
         .auth(json!({"token": token.jsonwebtoken}))
-        .on("Connect", connect_callback)
-        .on("connect", connect_callback)
-        .on("Error", |err, _| eprintln!("Error: {:#?}", err))
+        .on("error", |err, _| eprintln!("Error: {:#?}", err))
+        .on("gameState", |payload: Payload, socket: RawClient| gameStateCallback(payload, socket))
+        .on("eliminated", |payload: Payload, socket: RawClient| eliminatedCallback(payload, socket))
+        .on("gameInvite", |payload: Payload, socket: RawClient| gameInviteCallback(payload, socket))
+        .on("gameEnd", |payload: Payload, socket: RawClient| gameEndCallback(payload, socket))
+        .on("tournamentInvite", |payload: Payload, socket: RawClient| tournamentInviteCallback(payload, socket))
+        .on("tournamentEnd", |payload: Payload, socket: RawClient| tournemEndCallback(payload, socket))
         .connect()
         .expect("Connection failed");
 
