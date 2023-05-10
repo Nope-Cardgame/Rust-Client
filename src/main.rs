@@ -39,12 +39,15 @@ fn main() {
     if jsontoken.is_ok() {
         jsontkn.jsonwebtoken = jsontoken.unwrap();
 
-        // connect::connect::get_user_connections(&jsontkn).await;
-
+        // create new socket.io socket
         let socket = upgrade_socket(&jsontkn);
 
+
+        // test game creation request
         create_game(&jsontkn, Some(false), Some(false), Some(false));
 
+
+        // loop to extend connection
         let mut count = 0;
         loop {
             // socket.
@@ -54,6 +57,8 @@ fn main() {
                 break
             }
         }
+
+        // disconnect socket
         let _disconnect = socket.disconnect();
     }
 }
