@@ -54,7 +54,7 @@ pub fn get_user_connections(token: &Token) -> Result<ConnectedPlayers, Box<dyn E
 /// takes given JWT and tries to upgrade to websocket connection
 pub fn upgrade_socket(token: &Token) -> rust_socketio::client::Client {
 
-    //
+    // create a new socket.io socket and define all event callbacks
     let socket = ClientBuilder::new(dotenvy::var("BASE_URL").expect("error in auth: "))
         .auth(json!({"token": token.jsonwebtoken}))
         .on("error", |err, _| eprintln!("Error: {:#?}", err))
@@ -70,7 +70,8 @@ pub fn upgrade_socket(token: &Token) -> rust_socketio::client::Client {
     return socket;
 }
 
-
+/// sends a game creation request to the server
+/// currently selects first non-self player out of all connected players
 pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: Option<bool>, one_more_start_cards: Option<bool>) -> Game{
 
     let mut playing_players: Vec<ConnPlayer> = Vec::new();
@@ -91,10 +92,8 @@ pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: 
             playing_players.push(connected_players[0].clone());
         }
     }
-    // else {
-    //     return;
-    // }
 
+    // create a CreateGame object that will be converted to json
     let body = CreateGameBody {
         noActionCards: no_action_cards.unwrap_or(false),
         noWildCards: no_wild_cards.unwrap_or(false),
@@ -102,14 +101,17 @@ pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: 
         players: playing_players
     };
 
+    // create client for HTTP request
     let client = reqwest::blocking::Client::new();
 
+    // configure HTTP client and send request
     let res = client
         .post(dotenvy::var("API_URL").expect("error in auth: ") + "/game")
         .header("Authorization", "Bearer ".to_owned() + &token.jsonwebtoken)
         .json(&body)
         .send();
 
+    // parse response to Game object
     let response_string = r#res.unwrap().text().unwrap();
     let game: Game = serde_json::from_str(&response_string).unwrap();
 
