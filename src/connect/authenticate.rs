@@ -1,8 +1,6 @@
 use reqwest;
-use std::time::Duration;
 use dotenvy;
 use std::error::Error;
-use serde_json::{Value, json};
 use serde::{Deserialize, Serialize};
 use crate::Token;
 

@@ -1,13 +1,10 @@
-use std::time::Duration;
 use dotenvy;
 use std::error::Error;
-use std::ops::Index;
-use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use rust_socketio;
 use rust_socketio::{ClientBuilder, Payload, RawClient};
 use serde_json::json;
-use crate::connect::event_callbacks::{eliminatedCallback, gameEndCallback, gameInviteCallback, gameStateCallback, tournamentInviteCallback, tournemEndCallback};
+use crate::connect::event_callbacks::{eliminated_callback, game_end_callback, game_invite_callback, game_state_callback, tournament_invite_callback, tournament_end_callback};
 use crate::logic::game_objects::Game;
 use crate::Token;
 
@@ -26,7 +23,7 @@ pub struct ConnPlayer {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-
+#[allow(non_snake_case)]
 pub struct CreateGameBody {
     pub noActionCards: bool,
     pub noWildCards: bool,
@@ -58,15 +55,15 @@ pub fn get_user_connections(token: &Token) -> Result<ConnectedPlayers, Box<dyn E
 pub fn upgrade_socket(token: &Token) -> rust_socketio::client::Client {
 
     //
-    let mut socket = ClientBuilder::new(dotenvy::var("BASE_URL").expect("error in auth: "))
+    let socket = ClientBuilder::new(dotenvy::var("BASE_URL").expect("error in auth: "))
         .auth(json!({"token": token.jsonwebtoken}))
         .on("error", |err, _| eprintln!("Error: {:#?}", err))
-        .on("gameState", |payload: Payload, socket: RawClient| gameStateCallback(payload, socket))
-        .on("eliminated", |payload: Payload, socket: RawClient| eliminatedCallback(payload, socket))
-        .on("gameInvite", |payload: Payload, socket: RawClient| gameInviteCallback(payload, socket))
-        .on("gameEnd", |payload: Payload, socket: RawClient| gameEndCallback(payload, socket))
-        .on("tournamentInvite", |payload: Payload, socket: RawClient| tournamentInviteCallback(payload, socket))
-        .on("tournamentEnd", |payload: Payload, socket: RawClient| tournemEndCallback(payload, socket))
+        .on("gameState", |payload: Payload, socket: RawClient| game_state_callback(payload, socket))
+        .on("eliminated", |payload: Payload, socket: RawClient| eliminated_callback(payload, socket))
+        .on("gameInvite", |payload: Payload, socket: RawClient| game_invite_callback(payload, socket))
+        .on("gameEnd", |payload: Payload, socket: RawClient| game_end_callback(payload, socket))
+        .on("tournamentInvite", |payload: Payload, socket: RawClient| tournament_invite_callback(payload, socket))
+        .on("tournamentEnd", |payload: Payload, socket: RawClient| tournament_end_callback(payload, socket))
         .connect()
         .expect("Connection failed");
 
@@ -77,11 +74,11 @@ pub fn upgrade_socket(token: &Token) -> rust_socketio::client::Client {
 pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: Option<bool>, one_more_start_cards: Option<bool>) -> Game{
 
     let mut playing_players: Vec<ConnPlayer> = Vec::new();
-    let mut connected_players = get_user_connections(token).unwrap();
+    let connected_players = get_user_connections(token).unwrap();
 
     // get first connected Player that is not this client
     if connected_players.len() >= 2 {
-        for (index, player) in connected_players.iter().enumerate() {
+        for player in &connected_players {
             if player.username == dotenvy::var("AUTH_USER").expect("error retrieving username from .env - create_game()") {
                 playing_players.push(player.clone());
                 break;

@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 // structs are defined in a way, that serde_json can autotransform from a json string
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
 pub struct Game {
     pub id: String,
     pub state: String,
@@ -23,7 +24,10 @@ pub struct Game {
     pub endTime: Option<String>,
 }
 
+
+
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
 pub struct GamePlayer {
     pub username: String,
     pub socketId: String,
@@ -43,6 +47,7 @@ pub struct TournamentPlayer {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
 pub struct Tournament {
     pub id: String,
     pub mode: TournamentMode,
@@ -53,6 +58,7 @@ pub struct Tournament {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
 pub struct TournamentMode {
     pub name: String,
     pub numberOfRounds: String,
@@ -85,6 +91,7 @@ pub struct CardNominate {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
 pub struct Action {
     #[serde(rename = "type")]
     pub type_field: String,

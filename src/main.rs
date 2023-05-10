@@ -5,11 +5,7 @@ use std::{time};
 use std::thread::sleep;
 use std::time::Duration;
 use crate::connect::authenticate;
-use rust_socketio::{Payload, ClientBuilder, RawClient, SocketBuilder};
-use serde_json::{json, Value};
 use serde::{Deserialize, Serialize};
-use futures_util::FutureExt;
-use jsonwebtoken::crypto::sign;
 use crate::connect::connect::{create_game, upgrade_socket};
 
 #[derive( Debug, Deserialize, Serialize)]
@@ -28,7 +24,6 @@ fn main() {
 
     // try to sign up to server
     let mut jsontoken = authenticate::sign_up();
-    let test = authenticate::sign_in();
 
     // if signup failed try to log in 5 times
     let mut counter = 0;
@@ -46,9 +41,7 @@ fn main() {
 
         // connect::connect::get_user_connections(&jsontkn).await;
 
-        let mut socket = upgrade_socket(&jsontkn);
-
-        let connectedusers = connect::connect::get_user_connections(&jsontkn);
+        let socket = upgrade_socket(&jsontkn);
 
         create_game(&jsontkn, Some(false), Some(false), Some(false));
 
@@ -61,6 +54,6 @@ fn main() {
                 break
             }
         }
-        let disconnect = socket.disconnect();
+        let _disconnect = socket.disconnect();
     }
 }
