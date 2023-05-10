@@ -55,7 +55,7 @@ fn main() {
 
         let connectedusers = connect::connect::get_user_connections(&jsontkn);
 
-        create_game(&jsontkn, Some(false), Some(false), Some(false));
+        // create_game(&jsontkn, Some(false), Some(false), Some(false));
 
         let mut count = 0;
         loop {
