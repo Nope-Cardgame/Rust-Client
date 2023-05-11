@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use rust_socketio;
 use rust_socketio::{ClientBuilder, Payload, RawClient};
 use serde_json::json;
-use crate::connect::event_callbacks::{eliminated_callback, game_end_callback, game_invite_callback, game_state_callback, tournament_invite_callback, tournament_end_callback};
+use crate::connect::events::{eliminated_callback, game_end_callback, game_invite_callback, game_state_callback, tournament_invite_callback, tournament_end_callback};
 use crate::logic::game_objects::Game;
 use crate::Token;
 

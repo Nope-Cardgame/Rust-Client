@@ -50,12 +50,12 @@ fn main() {
         // loop to extend connection
         let mut count = 0;
         loop {
-            // socket.
-            sleep(Duration::from_secs(1));
-            count += 1;
-            if count == 30 {
-                break
-            }
+
+            // sleep(Duration::from_secs(1));
+            // count += 1;
+            // if count == 30 {
+            //     break
+            // }
         }
 
         // disconnect socket

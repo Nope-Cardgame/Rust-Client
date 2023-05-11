@@ -6,12 +6,12 @@ use serde::{Deserialize, Serialize};
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct Game {
-    pub id: String,
-    pub state: String,
-    pub noActionCards: bool,
-    pub noWildCards: bool,
-    pub oneMoreStartCard: bool,
-    pub players: Vec<GamePlayer>,
+    pub id: Option<String>,
+    pub state: Option<String>,
+    pub noActionCards: Option<bool>,
+    pub noWildCards: Option<bool>,
+    pub oneMoreStartCard: Option<bool>,
+    pub players: Option<Vec<GamePlayer>>,
     pub tournament: Option<Tournament>,
     pub gameRole: Option<String>,
     pub encounterRound: Option<i64>,
@@ -101,4 +101,13 @@ pub struct Action {
     pub player: Option<GamePlayer>,
     pub nominatedPlayer: Option<GamePlayer>,
     pub nominatedColor: Option<String>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct Ready {
+    #[serde(rename = "type")]
+    pub type_field: String,
+    pub accept: bool,
+    pub inviteId: String,
 }
