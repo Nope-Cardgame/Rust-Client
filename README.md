@@ -1,4 +1,4 @@
-# Nope - KI Spieler (_<programmier_sprache>_)
+# Nope - KI Spieler (_Rust_)
 
 Kurze Beschreibung des Repos und der übergriefenden Schnittstelle für die unterschiedlichen Clients.
 
