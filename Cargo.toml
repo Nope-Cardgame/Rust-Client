@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 rust_socketio = { version = "0.4.1"}
-websocket = "0.26.5"
 futures-util = "0.3.28"
 
 serde = "1.0.160"

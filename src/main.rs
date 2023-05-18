@@ -1,9 +1,10 @@
 mod logic;
 mod connect;
+mod menu;
+
 use dotenvy::dotenv;
-use std::{time};
+use std::time;
 use std::thread::sleep;
-use std::time::Duration;
 use crate::connect::authenticate;
 use serde::{Deserialize, Serialize};
 use crate::connect::connect::{create_game, upgrade_socket};
