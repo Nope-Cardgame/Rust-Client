@@ -5,6 +5,8 @@ mod menu;
 use dotenvy::dotenv;
 use std::time;
 use std::thread::sleep;
+use rust_socketio::client::Client;
+use rust_socketio::ClientBuilder;
 use crate::connect::authenticate;
 use serde::{Deserialize, Serialize};
 use crate::connect::connect::{create_game, upgrade_socket};
@@ -23,6 +25,10 @@ fn main() {
         jsonwebtoken: "".to_string(),
     };
 
+    let mut socket: Client = ClientBuilder::new(dotenvy::var("BASE_URL").expect("error in auth: "))
+        .connect()
+        .expect("dummy client ok");
+
     // try to sign up to server
     let mut jsontoken = authenticate::sign_up();
 
@@ -40,12 +46,14 @@ fn main() {
     if jsontoken.is_ok() {
         jsontkn.jsonwebtoken = jsontoken.unwrap();
 
+        menu::main_menu::menu(socket, &jsontkn);
+
         // create new socket.io socket
-        let socket = upgrade_socket(&jsontkn);
+        socket = upgrade_socket(&jsontkn);
 
 
         // test game creation request
-        create_game(&jsontkn, Some(false), Some(false), Some(false));
+        // create_game(&jsontkn, Some(false), Some(false), Some(false));
 
 
         // loop to extend connection

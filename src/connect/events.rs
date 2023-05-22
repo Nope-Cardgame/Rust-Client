@@ -1,6 +1,5 @@
 use rust_socketio::{Payload, RawClient};
 use serde_json::json;
-use crate::connect::connect::CreateGameBody;
 use crate::logic::game_objects::{Game, Ready};
 
 /// callback for gameState event, no current functionality
