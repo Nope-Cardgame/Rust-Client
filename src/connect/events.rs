@@ -149,7 +149,12 @@ pub fn tournament_invite_callback(payload: Payload, socket: RawClient) {
 /// callback for tournamentEnd event, no current functionality
 pub fn tournament_end_callback(payload: Payload, socket: RawClient) {
     match payload {
-        Payload::String(str) => println!("tournamentEnd Received: {}", str),
+        Payload::String(str) => {
+            println!("tournamentEnd Received: {}", str);
+            unsafe{
+                current_game::TOURNEY_FINISHED = true;
+            }
+        },
         Payload::Binary(bin_data) => println!("Received bytes: {:#?}", bin_data),
     }
 }
