@@ -1,10 +1,11 @@
 use dotenvy;
 use std::error::Error;
+use std::io::stdin;
 use serde::{Deserialize, Serialize};
 use rust_socketio;
-use rust_socketio::{ClientBuilder, Payload, RawClient};
+use rust_socketio::{ClientBuilder, Event, Payload, RawClient};
 use serde_json::json;
-use crate::connect::events::{eliminated_callback, game_end_callback, game_invite_callback, game_state_callback, tournament_invite_callback, tournament_end_callback};
+use crate::connect::events::{eliminated_callback, game_end_callback, game_invite_callback, game_state_callback, tournament_invite_callback, tournament_end_callback, socket_connect};
 use crate::logic::game_objects::Game;
 use crate::Token;
 
@@ -28,7 +29,13 @@ pub struct CreateGameBody {
     pub noActionCards: bool,
     pub noWildCards: bool,
     pub oneMoreStartCards: bool,
-    pub players: Vec<ConnPlayer>,
+    pub players: ConnectedPlayers,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CurrentGame {
+    pub active_game: bool,
+    pub game: Option<Game>,
 }
 
 /// gets a json array with all currently connected users
@@ -57,6 +64,7 @@ pub fn upgrade_socket(token: &Token) -> rust_socketio::client::Client {
     // create a new socket.io socket and define all event callbacks
     let socket = ClientBuilder::new(dotenvy::var("BASE_URL").expect("error in auth: "))
         .auth(json!({"token": token.jsonwebtoken}))
+        .on("connect", |payload: Payload, socket: RawClient| socket_connect(payload, socket))
         .on("error", |err, _| eprintln!("Error: {:#?}", err))
         .on("gameState", |payload: Payload, socket: RawClient| game_state_callback(payload, socket))
         .on("eliminated", |payload: Payload, socket: RawClient| eliminated_callback(payload, socket))
@@ -72,24 +80,38 @@ pub fn upgrade_socket(token: &Token) -> rust_socketio::client::Client {
 
 /// sends a game creation request to the server
 /// currently selects first non-self player out of all connected players
-pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: Option<bool>, one_more_start_cards: Option<bool>) -> Game{
-
+pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: Option<bool>, one_more_start_cards: Option<bool>) -> Game {
     let mut playing_players: Vec<ConnPlayer> = Vec::new();
-    let connected_players = get_user_connections(token).unwrap();
+    let mut connected_players = get_user_connections(token).unwrap();
+    let mut connected_players_clone = connected_players.clone();
 
-    // get first connected Player that is not this client
-    if connected_players.len() >= 2 {
-        for player in &connected_players {
-            if player.username == dotenvy::var("AUTH_USER").expect("error retrieving username from .env - create_game()") {
-                playing_players.push(player.clone());
-                break;
+    for (index, player) in connected_players_clone.iter().enumerate() {
+        if player.username == dotenvy::var("AUTH_USER").expect("error retrieving username from .env - create_game()") {
+            playing_players.push(connected_players_clone[index].clone());
+        }
+    }
+
+    print_player_list_num(&connected_players);
+    println!("Which player do you want to play against?\n");
+
+    let mut correct_input: bool = false;
+
+    while !correct_input {
+        let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+
+        let parsed_input = input.trim().parse::<i32>();
+
+        match parsed_input {
+            Ok(number) => {
+                if 0 < number && number <= (connected_players.len() + 1) as i32 {
+                    playing_players.push(connected_players[(number - 1) as usize].clone());
+                    correct_input = true;
+                }
             }
-        }
-        if connected_players[0].username == dotenvy::var("AUTH_USER").expect("error retrieving username from .env - create_game()") {
-            playing_players.push(connected_players[1].clone());
-        }
-        else {
-            playing_players.push(connected_players[0].clone());
+            Err(e) => {
+                println!("Input was not an integer!");
+            }
         }
     }
 
@@ -98,7 +120,7 @@ pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: 
         noActionCards: no_action_cards.unwrap_or(false),
         noWildCards: no_wild_cards.unwrap_or(false),
         oneMoreStartCards: one_more_start_cards.unwrap_or(false),
-        players: playing_players
+        players: playing_players,
     };
 
     // create client for HTTP request
@@ -118,4 +140,10 @@ pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: 
     println!("{:?}", &game);
 
     return game;
+}
+
+fn print_player_list_num(players: &ConnectedPlayers) {
+    for (index, player) in players.iter().enumerate() {
+        println!("{}: {}", index + 1, player.username);
+    }
 }

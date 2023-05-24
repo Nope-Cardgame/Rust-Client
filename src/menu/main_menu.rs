@@ -1,10 +1,11 @@
+use std::any::Any;
 use std::io::{stdin};
 use std::thread::sleep;
 use std::time::Duration;
 use rust_socketio::client::Client;
 use crate::connect::connect::{create_game, upgrade_socket};
 use crate::connect::events::eliminated_callback;
-use crate::Token;
+use crate::{connect, Token};
 
 pub fn menu(mut socket: Client, mut jsontkn: &Token) {
     let mut decided_end = false;
@@ -20,11 +21,15 @@ pub fn menu(mut socket: Client, mut jsontkn: &Token) {
 
         match input.trim_end() {
             "1" => {
-                socket = upgrade_socket(jsontkn);
+                unsafe {
+                    socket = upgrade_socket(jsontkn);
+                }
                 socket = single_game(socket, jsontkn);
             },
             "2" => {
-                socket = upgrade_socket(jsontkn);
+                unsafe {
+                    socket = upgrade_socket(jsontkn);
+                }
                 socket = tournament_game(socket);
             },
             "3" => {
@@ -54,15 +59,33 @@ fn single_game(mut socket: Client, jsontkn: &Token) -> Client{
         match input.trim_end() {
             "1" => {
                 println!("Ab hier läufts automatisch.");
+                unsafe {
+                    crate::connect::events::current_game::SINGLE_GAME = true;
+                    crate::connect::events::current_game::WAIT_FOR_INVITE = true;
+                }
                 loop {
                     sleep(Duration::from_secs(1));
+                    unsafe{
+                        if crate::connect::events::current_game::FINISHED{
+                            break;
+                        }
+                    }
                 }
             }
 
             "2" => {
+                unsafe {
+                    crate::connect::events::current_game::SINGLE_GAME = true;
+                }
                 socket = single_game_create(socket, jsontkn);
-                loop {
+                'game: loop {
                     sleep(Duration::from_secs(1));
+                    unsafe{
+                        if crate::connect::events::current_game::FINISHED{
+                            break 'game;
+                        }
+                    }
+                    // println!("single game created loop");
                 }
             },
 
@@ -72,21 +95,23 @@ fn single_game(mut socket: Client, jsontkn: &Token) -> Client{
         }
     }
 
-
-
     return socket;
 }
 
 fn single_game_create(socket: Client, jsontkn: &Token) -> Client {
-    create_game(jsontkn, Some(false), Some(false), Some(false));
+    create_game(jsontkn, Some(true), Some(true), Some(false));
     return socket;
 }
 
 fn tournament_game(socket: Client) -> Client {
     println!("Turniermodus gestartet.\nWarte auf Einladung...");
-    loop {
-
+    'tourney: loop {
+        sleep(Duration::from_secs(2));
+        unsafe{
+            if connect::events::current_game::TOURNEY_FINISHED {
+                break 'tourney;
+            }
+        }
     }
-
     return socket;
 }

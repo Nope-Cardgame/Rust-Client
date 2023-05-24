@@ -11,17 +11,18 @@ use crate::connect::authenticate;
 use serde::{Deserialize, Serialize};
 use crate::connect::connect::{create_game, upgrade_socket};
 
-#[derive( Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Token {
-    pub jsonwebtoken: String
+    pub jsonwebtoken: String,
 }
 
 fn main() {
     // load all environment variables from .env file
     dotenv().ok();
 
+
     // create empty Token object holding the JWT
-    let mut jsontkn : Token = Token {
+    let mut jsontkn: Token = Token {
         jsonwebtoken: "".to_string(),
     };
 
@@ -34,7 +35,7 @@ fn main() {
 
     // if signup failed try to log in 5 times
     let mut counter = 0;
-    while jsontoken.is_err() && counter < 1{
+    while jsontoken.is_err() && counter < 1 {
         jsontoken = authenticate::sign_in();
         if jsontoken.is_err() {
             counter += 1;

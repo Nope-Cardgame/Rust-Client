@@ -31,9 +31,9 @@ pub struct Game {
 pub struct GamePlayer {
     pub username: String,
     pub socketId: String,
-    pub cardAmount: i64,
-    pub disqualified: bool,
-    pub accepted: bool,
+    pub cardAmount: Option<i64>,
+    pub disqualified: Option<bool>,
+    pub accepted: Option<bool>,
     pub cards: Option<Vec<Card>>,
     pub ranking: Option<i64>,
 }
@@ -68,8 +68,8 @@ pub struct TournamentMode {
 pub struct Card {
     #[serde(rename = "type")]
     pub type_field: String,
-    pub value: i64,
-    pub color: Vec<String>,
+    pub value: Option<i64>,
+    pub colors: Option<Vec<String>>,
     pub name: String,
 }
 
@@ -96,11 +96,37 @@ pub struct Action {
     #[serde(rename = "type")]
     pub type_field: String,
     pub explanation: String,
-    pub amount: Option<i64>,
-    pub cards: Option<Card>,
+    pub cardAmount: Option<i64>,
+    pub cards: Option<Vec<Card>>,
     pub player: Option<GamePlayer>,
     pub nominatedPlayer: Option<GamePlayer>,
     pub nominatedColor: Option<String>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct DiscardAction {
+    #[serde(rename = "type")]
+    pub type_field: String,
+    pub explanation: String,
+    pub cards: Option<Vec<Card>>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct NopeAction {
+    #[serde(rename = "type")]
+    pub type_field: String,
+    pub explanation: String,
+    pub player: Option<GamePlayer>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct TakeAction {
+    #[serde(rename = "type")]
+    pub type_field: String,
+    pub explanation: String,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -110,4 +136,12 @@ pub struct Ready {
     pub type_field: String,
     pub accept: bool,
     pub inviteId: String,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct Eliminated {
+    #[serde(rename = "type")]
+    pub disqualified: bool,
+    pub reason: String,
 }
