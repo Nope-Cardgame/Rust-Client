@@ -113,5 +113,8 @@ fn tournament_game(socket: Client) -> Client {
             }
         }
     }
+    unsafe{
+        connect::events::current_game::TOURNEY_FINISHED = false;
+    }
     return socket;
 }

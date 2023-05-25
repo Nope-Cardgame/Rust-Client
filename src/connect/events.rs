@@ -140,6 +140,8 @@ pub fn tournament_invite_callback(payload: Payload, socket: RawClient) {
         Payload::String(str) => {
             println!("tournamentInvite Received: {}", str);
             let game: Tournament = serde_json::from_str(&str).unwrap();
+            ready(socket, "tournament".to_string(), game.id.expect("game id not available").to_string());
+
         },
         Payload::Binary(bin_data) => println!("Received bytes: {:#?}", bin_data),
     }

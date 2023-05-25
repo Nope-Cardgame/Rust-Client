@@ -28,10 +28,10 @@ pub unsafe fn basic_turn(game_state: &Game, socket: &RawClient) {
 
     match decider.type_field.trim_end() {
         "number" => {
-            if decider.name.trim_end() == "wildcard" {
-
-            }
-            else {
+            // if decider.name.trim_end() == "wildcard" {
+            //
+            // }
+            // else {
                 let play_successful = normal_number(&decider, &cards::cards, &opponent, socket);
                 if !play_successful {
                     if !cards::TOOK_CARDS {
@@ -44,7 +44,7 @@ pub unsafe fn basic_turn(game_state: &Game, socket: &RawClient) {
                     }
 
                 }
-            }
+            // }
 
         }
         "reset" => {
