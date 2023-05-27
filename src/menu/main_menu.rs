@@ -118,3 +118,17 @@ fn tournament_game(socket: Client) -> Client {
     }
     return socket;
 }
+
+pub fn load_alt() -> bool {
+    println!("Soll der alternative Testclient verbunden werden? (yes/no)");
+
+    let mut input = String::new();
+    stdin().read_line(&mut input).unwrap();
+
+    match input.trim_end() {
+        "yes" | "y" | "ja" | "j" => return true,
+
+        "no" | "n" | "nein" | _=> return false
+    }
+
+}

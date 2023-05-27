@@ -1,5 +1,6 @@
 use std::io::stdin;
 use std::ops::Deref;
+use std::thread::yield_now;
 use rust_socketio::{Event, Payload, RawClient, Socket};
 use serde_json::json;
 use crate::logic::game_objects::{Eliminated, Game, Ready, Tournament};
@@ -82,27 +83,17 @@ pub fn game_invite_callback(payload: Payload, socket: RawClient) {
                 stdin().read_line(&mut input).unwrap();
 
                 match input.trim_end() {
-                    "yes" | "y" | "ja" | "j" => {}
+                    "yes" | "y" | "ja" | "j" => {
+                        accept_game(socket, "game".to_string(), game.id.expect("game id not available").to_string());
+                    }
                     "no" | "n" | "nein" => {}
                     _ => {}
                 }
-                unsafe {
-                    if current_game::ONGOING == false {
-                        current_game::FINISHED = false;
-                        current_game::ONGOING = true;
-                        ready(socket, "game".to_string(), game.id.expect("game id not available").to_string());
-                    }
-                }
+
             }
             else if single_game && !wait_for_invite {
                 println!("Game invite received against {}.", opponent.username);
-                unsafe {
-                    if current_game::ONGOING == false {
-                        current_game::FINISHED = false;
-                        current_game::ONGOING = true;
-                        ready(socket, "game".to_string(), game.id.expect("game id not available").to_string());
-                    }
-                }
+                accept_game(socket, "game".to_string(), game.id.expect("game id not available").to_string());
             }
             else {
                 println!("Tournament game invite received. Accepting.");
@@ -161,6 +152,15 @@ pub fn tournament_end_callback(payload: Payload, socket: RawClient) {
     }
 }
 
+pub fn accept_game(socket: RawClient, game_type: String, invite_id: String) {
+    unsafe {
+        if current_game::ONGOING == false {
+            current_game::FINISHED = false;
+            current_game::ONGOING = true;
+            ready(socket, game_type, invite_id);
+        }
+    }
+}
 
 pub fn ready(socket: RawClient, game_type: String, invite_id: String) {
     let rdy = Ready {

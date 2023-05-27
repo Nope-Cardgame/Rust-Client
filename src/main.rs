@@ -18,8 +18,12 @@ pub struct Token {
 
 fn main() {
     // load all environment variables from .env file
-    dotenv().ok();
-
+    if menu::main_menu::load_alt() {
+        dotenvy::from_filename(".alt.env").ok();
+    }
+    else {
+        dotenv().ok();
+    }
 
     // create empty Token object holding the JWT
     let mut jsontkn: Token = Token {
