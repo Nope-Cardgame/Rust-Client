@@ -5,6 +5,7 @@ use rust_socketio::client::Client;
 use crate::connect::connect::{create_game, upgrade_socket};
 use crate::{connect, Token};
 
+/// entry for the main menu - can decide between single game and tournament
 pub fn menu(mut socket: Client, jsontkn: &Token) {
     let mut decided_end = false;
 
@@ -37,6 +38,7 @@ pub fn menu(mut socket: Client, jsontkn: &Token) {
     }
 }
 
+/// single game menu - let's player decide if game should wait for invite or create game
 fn single_game(mut socket: Client, jsontkn: &Token) -> Client{
     let mut correct_input = false;
 
@@ -97,11 +99,13 @@ fn single_game(mut socket: Client, jsontkn: &Token) -> Client{
     return socket;
 }
 
+/// internal function to create game
 fn single_game_create(socket: Client, jsontkn: &Token) -> Client {
     create_game(jsontkn, Some(true), Some(true), Some(false));
     return socket;
 }
 
+/// internal function to wait for tournament invite
 fn tournament_game(socket: Client) -> Client {
     println!("Turniermodus gestartet.\nWarte auf Einladung...");
     'tourney: loop {
@@ -118,6 +122,7 @@ fn tournament_game(socket: Client) -> Client {
     return socket;
 }
 
+/// check if alternate account should be connected
 pub fn load_alt() -> bool {
     println!("Soll der alternative Testclient verbunden werden? (yes/no)");
 
