@@ -43,19 +43,20 @@ pub fn menu(mut socket: Client, mut jsontkn: &Token) {
 }
 
 fn single_game(mut socket: Client, jsontkn: &Token) -> Client{
-    println!("started single game!");
-
-    println!("Was möchtest du tun?");
-    println!("1: Auf Einladung warten");
-    println!("2: Spiel erstellen");
-    println!("3: Zurück");
-
-    let mut input = String::new();
-    stdin().read_line(&mut input).unwrap();
-
     let mut correct_input = false;
 
     while !correct_input {
+        println!("started single game!");
+
+        println!("Was möchtest du tun?");
+        println!("1: Auf Einladung warten");
+        println!("2: Spiel erstellen");
+        println!("3: Zurück");
+
+        let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+
+
         match input.trim_end() {
             "1" => {
                 println!("Ab hier läufts automatisch.");
@@ -70,6 +71,9 @@ fn single_game(mut socket: Client, jsontkn: &Token) -> Client{
                             break;
                         }
                     }
+                }
+                unsafe{
+                    connect::events::current_game::FINISHED = false;
                 }
             }
 

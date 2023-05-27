@@ -91,12 +91,13 @@ pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: 
         }
     }
 
-    print_player_list_num(&connected_players);
-    println!("Which player do you want to play against?\n");
-
     let mut correct_input: bool = false;
 
     while !correct_input {
+        connected_players = get_user_connections(token).unwrap();
+        print_player_list_num(&connected_players);
+        println!("Which player do you want to play against?\n");
+
         let mut input = String::new();
         stdin().read_line(&mut input).unwrap();
 
@@ -104,9 +105,12 @@ pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: 
 
         match parsed_input {
             Ok(number) => {
-                if 0 < number && number <= (connected_players.len() + 1) as i32 {
+                if 0 < number && number <= (connected_players.len()) as i32 {
                     playing_players.push(connected_players[(number - 1) as usize].clone());
                     correct_input = true;
+                }
+                else {
+                    println!("Eingabe war keine der gegebenen Zahlen!\n");
                 }
             }
             Err(e) => {
