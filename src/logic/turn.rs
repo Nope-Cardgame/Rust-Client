@@ -9,6 +9,8 @@ pub mod cards {
     pub static mut TOOK_CARDS: bool = false;
 }
 
+/// this function plays a simple turn selecting the first available cards
+/// it can only play rule-safe turns
 pub unsafe fn basic_turn(game_state: &Game, socket: &RawClient) {
     static mut TOOK_CARDS: bool = false;
     cards::CARDS = [].to_vec();
@@ -21,30 +23,35 @@ pub unsafe fn basic_turn(game_state: &Game, socket: &RawClient) {
         }
     }
 
+    // get the first card of the discard pile and regard is as the deciding card
     let discard_pile = game_state.clone().discardPile.unwrap();
     let decider = discard_pile.get(0).unwrap();
 
+    // match the decider type
     match decider.type_field.trim_end() {
+        // search if hand has the right cards
         "number" => {
-            // if decider.name.trim_end() == "wildcard" {
-            //
-            // }
-            // else {
-                let play_successful = normal_number(&decider, &cards::CARDS, &opponent, socket);
-                if !play_successful {
-                    if !cards::TOOK_CARDS {
-                        cards::TOOK_CARDS = true;
-                        take_cards(socket);
-                    }
-                    else {
-                        TOOK_CARDS = false;
-                        play_nope(socket);
-                    }
+            let play_successful = number_card(&decider, &cards::CARDS, &opponent, socket);
 
+            if !play_successful {
+                // take cards if couldn't discard from hand
+                if !cards::TOOK_CARDS {
+                    cards::TOOK_CARDS = true;
+                    take_cards(socket);
                 }
-            // }
+                // nope if already took cards
+                else {
+                    TOOK_CARDS = false;
+                    play_nope(socket);
+                }
+
+            }
 
         }
+
+        // action cards section
+
+
         "reset" => {
             println!("Received reset card!");
         }
@@ -61,7 +68,9 @@ pub unsafe fn basic_turn(game_state: &Game, socket: &RawClient) {
     }
 }
 
-fn normal_number(decider: &Card, current_cards: &Vec<Card>, opponent: &GamePlayer, socket: &RawClient) -> bool {
+/// check if the card colour & amount is in hands
+/// send cards if successful
+fn number_card(decider: &Card, current_cards: &Vec<Card>, opponent: &GamePlayer, socket: &RawClient) -> bool {
     println!("Received number card!");
     for decider_color in decider.colors.as_ref().unwrap() {
         let mut possible_cards: Vec<Card> = [].to_vec();
@@ -88,6 +97,7 @@ fn normal_number(decider: &Card, current_cards: &Vec<Card>, opponent: &GamePlaye
     return false;
 }
 
+/// internal function to send play cards event
 fn play_cards(cards: Vec<Card>, socket: &RawClient, _opponent: &GamePlayer) {
     println!("playing {:?}", cards);
     let action_body = DiscardAction {
@@ -102,6 +112,7 @@ fn play_cards(cards: Vec<Card>, socket: &RawClient, _opponent: &GamePlayer) {
     socket.emit("playAction", payload).expect("error in sending played cards");
 }
 
+/// internal function to send nope event
 fn play_nope(socket: &RawClient) {
     println!("no cards to play... nope!");
     let action_body = NopeAction {
@@ -119,6 +130,7 @@ fn play_nope(socket: &RawClient) {
     socket.emit("playAction", payload).expect("error in sending played cards");
 }
 
+/// send event to take cards
 pub fn take_cards(socket: &RawClient) {
     println!("no cards to play, taking cards!");
     let action_body = TakeAction {
