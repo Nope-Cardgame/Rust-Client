@@ -9,7 +9,6 @@ use rust_socketio::client::Client;
 use rust_socketio::ClientBuilder;
 use crate::connect::authenticate;
 use serde::{Deserialize, Serialize};
-use crate::connect::connect::{create_game, upgrade_socket};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Token {
@@ -30,7 +29,7 @@ fn main() {
         jsonwebtoken: "".to_string(),
     };
 
-    let mut socket: Client = ClientBuilder::new(dotenvy::var("BASE_URL").expect("error in auth: "))
+    let socket: Client = ClientBuilder::new(dotenvy::var("BASE_URL").expect("error in auth: "))
         .connect()
         .expect("dummy client ok");
 
@@ -53,26 +52,5 @@ fn main() {
 
         menu::main_menu::menu(socket, &jsontkn);
 
-        // create new socket.io socket
-        socket = upgrade_socket(&jsontkn);
-
-
-        // test game creation request
-        // create_game(&jsontkn, Some(false), Some(false), Some(false));
-
-
-        // loop to extend connection
-        let mut count = 0;
-        loop {
-
-            // sleep(Duration::from_secs(1));
-            // count += 1;
-            // if count == 30 {
-            //     break
-            // }
-        }
-
-        // disconnect socket
-        let _disconnect = socket.disconnect();
     }
 }

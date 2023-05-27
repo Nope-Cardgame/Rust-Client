@@ -3,7 +3,7 @@ use std::error::Error;
 use std::io::stdin;
 use serde::{Deserialize, Serialize};
 use rust_socketio;
-use rust_socketio::{ClientBuilder, Event, Payload, RawClient};
+use rust_socketio::{ClientBuilder, Payload, RawClient};
 use serde_json::json;
 use crate::connect::events::{eliminated_callback, game_end_callback, game_invite_callback, game_state_callback, tournament_invite_callback, tournament_end_callback, socket_connect};
 use crate::logic::game_objects::Game;
@@ -83,7 +83,7 @@ pub fn upgrade_socket(token: &Token) -> rust_socketio::client::Client {
 pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: Option<bool>, one_more_start_cards: Option<bool>) -> Game {
     let mut playing_players: Vec<ConnPlayer> = Vec::new();
     let mut connected_players = get_user_connections(token).unwrap();
-    let mut connected_players_clone = connected_players.clone();
+    let connected_players_clone = connected_players.clone();
 
     for (index, player) in connected_players_clone.iter().enumerate() {
         if player.username == dotenvy::var("AUTH_USER").expect("error retrieving username from .env - create_game()") {
@@ -114,7 +114,7 @@ pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: 
                 }
             }
             Err(e) => {
-                println!("Input was not an integer!");
+                println!("Input was not an integer! {}", e.to_string());
             }
         }
     }

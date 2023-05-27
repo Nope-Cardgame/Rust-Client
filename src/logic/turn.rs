@@ -1,25 +1,23 @@
-use std::time::Duration;
 use rust_socketio::RawClient;
 use serde_json::json;
-use serde_json::Value::Null;
-use crate::logic::game_objects::{Action, Card, DiscardAction, Game, GamePlayer, NopeAction, TakeAction};
+use crate::logic::game_objects::{Card, DiscardAction, Game, GamePlayer, NopeAction, TakeAction};
 
 pub mod cards {
     use crate::logic::game_objects::Card;
 
-    pub static mut cards: Vec<Card> = Vec::new();
+    pub static mut CARDS: Vec<Card> = Vec::new();
     pub static mut TOOK_CARDS: bool = false;
 }
 
 pub unsafe fn basic_turn(game_state: &Game, socket: &RawClient) {
     static mut TOOK_CARDS: bool = false;
-    cards::cards = [].to_vec();
+    cards::CARDS = [].to_vec();
     let players = game_state.clone().players.unwrap();
     let opponent = players.get(1).unwrap().clone();
 
     for player in  players {
         if player.username == dotenvy::var("AUTH_USER").expect("error retrieving username from .env - create_game()") {
-            cards::cards = player.cards.unwrap();
+            cards::CARDS = player.cards.unwrap();
         }
     }
 
@@ -32,7 +30,7 @@ pub unsafe fn basic_turn(game_state: &Game, socket: &RawClient) {
             //
             // }
             // else {
-                let play_successful = normal_number(&decider, &cards::cards, &opponent, socket);
+                let play_successful = normal_number(&decider, &cards::CARDS, &opponent, socket);
                 if !play_successful {
                     if !cards::TOOK_CARDS {
                         cards::TOOK_CARDS = true;
@@ -90,7 +88,7 @@ fn normal_number(decider: &Card, current_cards: &Vec<Card>, opponent: &GamePlaye
     return false;
 }
 
-fn play_cards(cards: Vec<Card>, socket: &RawClient, opponent: &GamePlayer) {
+fn play_cards(cards: Vec<Card>, socket: &RawClient, _opponent: &GamePlayer) {
     println!("playing {:?}", cards);
     let action_body = DiscardAction {
         type_field: "discard".to_string(),

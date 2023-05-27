@@ -1,13 +1,11 @@
-use std::any::Any;
 use std::io::{stdin};
 use std::thread::sleep;
 use std::time::Duration;
 use rust_socketio::client::Client;
 use crate::connect::connect::{create_game, upgrade_socket};
-use crate::connect::events::eliminated_callback;
 use crate::{connect, Token};
 
-pub fn menu(mut socket: Client, mut jsontkn: &Token) {
+pub fn menu(mut socket: Client, jsontkn: &Token) {
     let mut decided_end = false;
 
     while !decided_end {
@@ -21,15 +19,11 @@ pub fn menu(mut socket: Client, mut jsontkn: &Token) {
 
         match input.trim_end() {
             "1" => {
-                unsafe {
-                    socket = upgrade_socket(jsontkn);
-                }
+                socket = upgrade_socket(jsontkn);
                 socket = single_game(socket, jsontkn);
             },
             "2" => {
-                unsafe {
-                    socket = upgrade_socket(jsontkn);
-                }
+                socket = upgrade_socket(jsontkn);
                 socket = tournament_game(socket);
             },
             "3" => {
@@ -39,6 +33,7 @@ pub fn menu(mut socket: Client, mut jsontkn: &Token) {
             _ =>
                 println!("Ungültige eingabe, versuche es noch einmal.\n\n")
         }
+        _ = &socket;
     }
 }
 

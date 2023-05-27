@@ -1,10 +1,7 @@
 use std::io::stdin;
-use std::ops::Deref;
-use std::thread::yield_now;
-use rust_socketio::{Event, Payload, RawClient, Socket};
+use rust_socketio::{Payload, RawClient};
 use serde_json::json;
 use crate::logic::game_objects::{Eliminated, Game, Ready, Tournament};
-use crate::connect::connect::CurrentGame;
 use crate::logic::turn::basic_turn;
 
 
@@ -17,7 +14,7 @@ pub mod current_game {
 }
 
 
-pub fn socket_connect(payload: Payload, socket: RawClient) {
+pub fn socket_connect(payload: Payload, _socket: RawClient) {
     match payload {
         Payload::String(str) => println!("gameState received: {}", str),
         Payload::Binary(bin_data) => println!("Received bytes: {:#?}", bin_data),
@@ -42,7 +39,7 @@ pub fn game_state_callback(payload: Payload, socket: RawClient) {
 
 
 /// callback for eliminated event, no current functionality
-pub fn eliminated_callback(payload: Payload, socket: RawClient) {
+pub fn eliminated_callback(payload: Payload, _socket: RawClient) {
     match payload {
         Payload::String(str) => {
             println!("eliminated Received: {}", str);
@@ -69,14 +66,14 @@ pub fn game_invite_callback(payload: Payload, socket: RawClient) {
             let players = game.players.unwrap().clone();
             let opponent = players.get(0).unwrap().clone();
 
-            let mut single_game: bool = true;
-            let mut wait_for_invite: bool = false;
+            let mut _single_game: bool = true;
+            let mut _wait_for_invite: bool = false;
             unsafe {
-                single_game = crate::connect::events::current_game::SINGLE_GAME;
-                wait_for_invite = crate::connect::events::current_game::WAIT_FOR_INVITE;
+                _single_game = crate::connect::events::current_game::SINGLE_GAME;
+                _wait_for_invite = crate::connect::events::current_game::WAIT_FOR_INVITE;
             }
 
-            if single_game && wait_for_invite{
+            if _single_game && _wait_for_invite {
                 println!("Game invite received against {}. Do you want to accept? (yes/no)", opponent.username);
 
                 let mut input = String::new();
@@ -91,7 +88,7 @@ pub fn game_invite_callback(payload: Payload, socket: RawClient) {
                 }
 
             }
-            else if single_game && !wait_for_invite {
+            else if _single_game && !_wait_for_invite {
                 println!("Game invite received against {}.", opponent.username);
                 accept_game(socket, "game".to_string(), game.id.expect("game id not available").to_string());
             }
@@ -106,7 +103,7 @@ pub fn game_invite_callback(payload: Payload, socket: RawClient) {
 
 
 /// callback for gameEnd event, no current functionality
-pub fn game_end_callback(payload: Payload, socket: RawClient) {
+pub fn game_end_callback(payload: Payload, _socket: RawClient) {
     match payload {
         Payload::String(str) => {
             println!("gameEnd Received: {}", str);
@@ -140,7 +137,7 @@ pub fn tournament_invite_callback(payload: Payload, socket: RawClient) {
 
 
 /// callback for tournamentEnd event, no current functionality
-pub fn tournament_end_callback(payload: Payload, socket: RawClient) {
+pub fn tournament_end_callback(payload: Payload, _socket: RawClient) {
     match payload {
         Payload::String(str) => {
             println!("tournamentEnd Received: {}", str);
