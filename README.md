@@ -1,6 +1,6 @@
-# Nope - KI Spieler (_<programmier_sprache>_)
+# Nope - KI Spieler (_Rust_)
 
-Kurze Beschreibung des Repos und der übergriefenden Schnittstelle für die unterschiedlichen Clients.
+Kurze Beschreibung des Repos und der übergreifenden Schnittstelle für die unterschiedlichen Clients.
 
 
 ## Dokumentation
@@ -8,12 +8,22 @@ Kurze Beschreibung des Repos und der übergriefenden Schnittstelle für die unte
 
 
 ## Mitglieder
-Mitglied | entwickelter Client | 
---- | --- |
-[Lukas Arnold](https://github.com/JudiTeller) | Client
- - | 
- - | 
+| Mitglied                                      | entwickelter Client | 
+|-----------------------------------------------|---------------------|
+| [Lukas Arnold](https://github.com/JudiTeller) | Client              |
+| -                                             | 
+| -                                             | 
 
+## Coding Conventions
+Es wird sich weitgehendst an die etablierten Rust Coding Conventions gehalten. <br>
+Ausnahmen gelten nur z.B. bei name-styling durch Vorgaben der Serverschnittstelle <br>
+Beispiel: noActionCards member aus Game Struct<br>
+
+| Rust Convention | Ausnahme      |
+|-----------------|---------------|
+| no_action_cards | noActionCards |
+
+In solchen Fällen müssen die Conventions gebrochen werden um funktionale Kompatibilität zu gewährleisten
 
 ## Installation
 
@@ -21,11 +31,10 @@ Erklärung wie das Projekt ausgeführt wird
 
 1. Sicherstellen, dass rustc und cargo installiert sind. [Anleitung](https://www.rust-lang.org/tools/install)
 2. Klonen des GitHub-Repo
-3. `cargo build` ausführen
-4. `rustc main.rs` ausführen 
-5. Ausführen des Programms
-   - `./main` auf Linux / Mac
-   - `.\main.exe` auf Windows
+3. `cargo build` ausführen ODER `rustc main.rs` ausführen 
+4. Ausführen des Programms
+   - `./rust-client` auf Linux / Mac
+   - `.\rust-client.exe` auf Windows
 
 
 ## Benutzung
