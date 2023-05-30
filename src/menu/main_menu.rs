@@ -6,7 +6,7 @@ use crate::connect::connect::{create_game, upgrade_socket};
 use crate::{connect, Token};
 
 pub mod menu_state {
-    pub static mut first_start: bool = true;
+    pub static mut FIRST_START: bool = true;
 }
 
 /// entry for the main menu - can decide between single game and tournament
@@ -24,7 +24,7 @@ pub fn menu(mut socket: Client, jsontkn: &Token) {
 
         let mut _first_start = true;
         unsafe {
-            _first_start = menu_state::first_start;
+            _first_start = menu_state::FIRST_START;
         }
 
         match input.trim_end() {
@@ -32,7 +32,7 @@ pub fn menu(mut socket: Client, jsontkn: &Token) {
                 if _first_start {
                     socket = upgrade_socket(jsontkn);
                     unsafe {
-                        menu_state::first_start = false;
+                        menu_state::FIRST_START = false;
                     }
                 }
                 socket = single_game(socket, jsontkn);
@@ -41,7 +41,7 @@ pub fn menu(mut socket: Client, jsontkn: &Token) {
                 if _first_start {
                     socket = upgrade_socket(jsontkn);
                     unsafe {
-                        menu_state::first_start = false;
+                        menu_state::FIRST_START = false;
                     }
                 }
                 socket = tournament_game(socket);
