@@ -5,6 +5,10 @@ use rust_socketio::client::Client;
 use crate::connect::connect::{create_game, upgrade_socket};
 use crate::{connect, Token};
 
+pub mod menu_state {
+    pub static mut first_start: bool = true;
+}
+
 /// entry for the main menu - can decide between single game and tournament
 pub fn menu(mut socket: Client, jsontkn: &Token) {
     let mut decided_end = false;
@@ -18,13 +22,28 @@ pub fn menu(mut socket: Client, jsontkn: &Token) {
         let mut input = String::new();
         stdin().read_line(&mut input).unwrap();
 
+        let mut _first_start = true;
+        unsafe {
+            _first_start = menu_state::first_start;
+        }
+
         match input.trim_end() {
             "1" => {
-                socket = upgrade_socket(jsontkn);
+                if _first_start {
+                    socket = upgrade_socket(jsontkn);
+                    unsafe {
+                        menu_state::first_start = false;
+                    }
+                }
                 socket = single_game(socket, jsontkn);
             },
             "2" => {
-                socket = upgrade_socket(jsontkn);
+                if _first_start {
+                    socket = upgrade_socket(jsontkn);
+                    unsafe {
+                        menu_state::first_start = false;
+                    }
+                }
                 socket = tournament_game(socket);
             },
             "3" => {

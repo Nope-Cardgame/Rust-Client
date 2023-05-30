@@ -22,6 +22,10 @@ pub struct Game {
     pub initialTopCard: Option<Card>,
     pub actions: Option<Action>,
     pub endTime: Option<String>,
+    pub actionTimeout: Option<i32>,
+    pub invitationTimeout: Option<i32>,
+    pub startWithRejection: Option<bool>,
+    pub playerAmount: Option<i32>,
 }
 
 
@@ -55,13 +59,19 @@ pub struct Tournament {
     pub games: Option<Vec<Game>>,
     pub startTime: Option<String>,
     pub endTime: Option<String>,
+    pub actionTimeout: Option<i32>,
+    pub invitationTimeout: Option<i32>,
+    pub startWithRejection: Option<bool>,
+    pub sendGameInvite: Option<bool>,
+    pub participantAmount: Option<i32>,
+    pub gameAmount: Option<i32>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct TournamentMode {
     pub name: Option<String>,
-    pub numberOfRounds: Option<String>,
+    pub numberOfRounds: Option<i32>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -141,7 +151,6 @@ pub struct Ready {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct Eliminated {
-    #[serde(rename = "type")]
     pub disqualified: bool,
     pub reason: String,
 }
