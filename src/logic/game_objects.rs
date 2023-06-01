@@ -141,6 +141,20 @@ pub struct TakeAction {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
+pub struct NominateAction {
+    #[serde(rename = "type")]
+    pub type_field: String,
+    pub explanation: String,
+    pub amount: Option<i32>,
+    pub cards: Option<Vec<Card>>,
+    pub player: Option<GamePlayer>,
+    pub nominatedPlayer: Option<GamePlayer>,
+    pub nominatedAmount: Option<i32>,
+    pub nominatedColor: Option<String>
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
 pub struct Ready {
     #[serde(rename = "type")]
     pub type_field: String,

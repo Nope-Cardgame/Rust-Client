@@ -2,7 +2,7 @@ use std::io::stdin;
 use rust_socketio::{Payload, RawClient};
 use serde_json::json;
 use crate::logic::game_objects::{Eliminated, Game, Ready, Tournament};
-use crate::logic::turn::basic_turn;
+use crate::logic::turn::ai_turn;
 
 
 /// this module contains some static variables deciding game flow
@@ -33,7 +33,7 @@ pub fn game_state_callback(payload: Payload, socket: RawClient) {
             // socket.io received new game state, if this client is the player for the current turn, calculate turn
             if game_state.currentPlayer.as_ref().unwrap().username == dotenvy::var("AUTH_USER").expect("error retrieving username from .env - create_game()"){
                 unsafe{
-                    basic_turn(&game_state, &socket);
+                    ai_turn(&game_state, &socket);
                 }
             }
         },
