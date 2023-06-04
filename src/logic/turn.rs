@@ -30,7 +30,7 @@ pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
     match decider.type_field.trim_end() {
         // search if hand has the right cards
         "number" => {
-            discard_loop(decider, &opponent);
+            discard_loop(decider, &opponent, socket);
         }
 
         // action cards section
@@ -45,10 +45,10 @@ pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
             println!("Received invis card!");
             if discard_pile.len() > 1 {
                 decider = discard_pile.get(1).unwrap();
-                discard_loop(decider, &opponent);
+                discard_loop(decider, &opponent, socket);
             }
             else {
-                discard_loop(decider, &opponent);
+                discard_loop(decider, &opponent, socket);
             }
 
         }
@@ -62,7 +62,7 @@ pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
     }
 }
 
-fn discard_loop(decider: &Card, opponent: &GamePlayer) {
+fn discard_loop(decider: &Card, opponent: &GamePlayer, socket: &RawClient) {
     unsafe {
         let play_successful = number_card(&decider, &cards::CARDS, &opponent, socket);
 
@@ -104,8 +104,8 @@ fn number_card(decider: &Card, current_cards: &Vec<Card>, opponent: &GamePlayer,
                 cards::TOOK_CARDS = false;
             }
 
-            for card in possible_cards {
-                if action_names.contains(card.type_field.as_ref()) {
+            for card in &possible_cards {
+                if action_names.contains(&card.type_field) {
                     let mut action_card_vec: Vec<Card> = [].to_vec();
                     action_card_vec.push(card.clone());
                     play_action(action_card_vec, socket, &opponent);
@@ -144,8 +144,8 @@ fn play_action(cards: Vec<Card>, socket: &RawClient, opponent: &GamePlayer) {
             discard_cards(cards, socket, opponent);
         }
         "nominate" => {
-            let color = cards.get(0).unwrap().colors.unwrap().get(0).unwrap();
-            play_nominate(cards, socket, opponent, 1, color)
+            let color = &cards.get(0).as_ref().unwrap().colors.as_ref().unwrap().get(0).unwrap();
+            play_nominate(cards.clone(), socket, opponent, 1, color)
         }
         _ => println!("something went wrong in play_action")
     }

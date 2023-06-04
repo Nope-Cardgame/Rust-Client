@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 // this file contains all Game Object structs
 // structs are defined in a way, that serde_json can autotransform from a json string
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct Game {
@@ -28,8 +29,7 @@ pub struct Game {
     pub playerAmount: Option<i32>,
 }
 
-
-
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct GamePlayer {
@@ -42,6 +42,7 @@ pub struct GamePlayer {
     pub ranking: Option<i64>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TournamentPlayer {
     pub username: Option<String>,
@@ -50,6 +51,7 @@ pub struct TournamentPlayer {
     pub score: Option<i64>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct Tournament {
@@ -67,6 +69,7 @@ pub struct Tournament {
     pub gameAmount: Option<i32>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct TournamentMode {
@@ -74,6 +77,7 @@ pub struct TournamentMode {
     pub numberOfRounds: Option<i32>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Card {
     #[serde(rename = "type")]
@@ -83,6 +87,7 @@ pub struct Card {
     pub name: Option<String>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WildCard {
     #[serde(rename = "type")]
@@ -92,6 +97,7 @@ pub struct WildCard {
     pub name: Option<String>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CardNominate {
     #[serde(rename = "type")]
@@ -100,6 +106,7 @@ pub struct CardNominate {
     pub name: Option<String>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct Action {
@@ -113,6 +120,7 @@ pub struct Action {
     pub nominatedColor: Option<String>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct DiscardAction {
@@ -122,6 +130,7 @@ pub struct DiscardAction {
     pub cards: Option<Vec<Card>>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct NopeAction {
@@ -139,6 +148,7 @@ pub struct TakeAction {
     pub explanation: String,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct NominateAction {
