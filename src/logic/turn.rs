@@ -154,7 +154,7 @@ fn play_action(cards: Vec<Card>, socket: &RawClient, opponent: &GamePlayer) {
 fn play_nominate(cards: Vec<Card>, socket: &RawClient, opponent: &GamePlayer, nominate_amount: i32, nominated_color: &str) {
     println!("playing {:?}", cards);
     let action_body = NominateAction {
-        type_field: "discard".to_string(),
+        type_field: "nominate".to_string(),
         explanation: "playing a nominate card!".to_string(),
         amount: None,
         cards: Option::from(cards),

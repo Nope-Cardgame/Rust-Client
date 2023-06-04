@@ -6,7 +6,7 @@ use rust_socketio;
 use rust_socketio::{ClientBuilder, Payload, RawClient};
 use serde_json::json;
 use crate::connect::events::{eliminated_callback, game_end_callback, game_invite_callback, game_state_callback, tournament_invite_callback, tournament_end_callback, socket_connect};
-use crate::logic::game_objects::Game;
+use crate::logic::game_objects::{Game, GamePlayer};
 use crate::Token;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -14,23 +14,7 @@ struct Body {
     jsonwebtoken: String,
 }
 
-pub type ConnectedPlayers = Vec<ConnPlayer>;
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ConnPlayer {
-    pub username: String,
-    pub socket_id: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[allow(non_snake_case)]
-pub struct CreateGameBody {
-    pub noActionCards: bool,
-    pub noWildCards: bool,
-    pub oneMoreStartCards: bool,
-    pub players: ConnectedPlayers,
-}
+pub type ConnectedPlayers = Vec<GamePlayer>;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CurrentGame {
@@ -81,7 +65,7 @@ pub fn upgrade_socket(token: &Token) -> rust_socketio::client::Client {
 /// sends a game creation request to the server
 /// currently selects first non-self player out of all connected players
 pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: Option<bool>, one_more_start_cards: Option<bool>) -> Game {
-    let mut playing_players: Vec<ConnPlayer> = Vec::new();
+    let mut playing_players: Vec<GamePlayer> = Vec::new();
     let mut connected_players = get_user_connections(token).unwrap();
     let connected_players_clone = connected_players.clone();
 
@@ -120,11 +104,27 @@ pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: 
     }
 
     // create a CreateGame object that will be converted to json
-    let body = CreateGameBody {
-        noActionCards: no_action_cards.unwrap_or(false),
-        noWildCards: no_wild_cards.unwrap_or(false),
-        oneMoreStartCards: one_more_start_cards.unwrap_or(false),
-        players: playing_players,
+    let body = Game {
+        id: None,
+        state: None,
+        noActionCards: Option::from(no_action_cards.unwrap_or(false)),
+        noWildCards: Option::from(no_wild_cards.unwrap_or(false)),
+        oneMoreStartCard: Option::from(one_more_start_cards.unwrap_or(false)),
+        players: Option::from(playing_players),
+        tournament: None,
+        gameRole: None,
+        encounterRound: None,
+        discardPile: None,
+        lastAction: None,
+        currentPlayer: None,
+        startTime: None,
+        initialTopCard: None,
+        actions: None,
+        endTime: None,
+        actionTimeout: Option::from(120),
+        invitationTimeout: None,
+        startWithRejection: None,
+        playerAmount: None,
     };
 
     // create client for HTTP request

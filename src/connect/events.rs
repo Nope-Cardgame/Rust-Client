@@ -46,11 +46,11 @@ pub fn game_state_callback(payload: Payload, socket: RawClient) {
 pub fn eliminated_callback(payload: Payload, _socket: RawClient) {
     match payload {
         Payload::String(str) => {
-            println!("eliminated Received: {}", str);
+            println!("\n\neliminated Received: {}", str);
             let eliminated_result = serde_json::from_str(&str);
             let eliminated: Eliminated = eliminated_result.unwrap();
             if !eliminated.disqualified {
-                println!("You sadly lost the round. No more cards on your hand!");
+                println!("You sadly lost the round. No more cards on your hand!\n\n");
             }
 
 
