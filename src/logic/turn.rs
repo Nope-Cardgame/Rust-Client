@@ -37,6 +37,8 @@ pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
 
         "reset" => {
             println!("Received reset card!");
+
+            // just take first available card
             let mut play_first: Vec<Card> = [].to_vec();
             play_first.push(cards::CARDS[0].clone());
             if play_first.get(0).unwrap().type_field == "number" {
@@ -61,13 +63,28 @@ pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
         "nominate" => {
             println!("Received nominate card!");
 
-            let nominate_decider: Card = Card {
-                type_field: "number".to_string(),
-                value: game_state.lastNominateAmount.clone(),
-                colors: decider.colors.clone(),
-                name: decider.name.clone(),
-            };
-            discard_loop(&nominate_decider, &opponent, socket);
+            // if nominate is first card in game
+            if discard_pile.len() == 1 {
+                let nominate_card = discard_pile.get(0).unwrap().clone();
+                let mut card_vec: Vec<Card> = [].to_vec();
+                card_vec.push(nominate_card.clone());
+                play_nominate(card_vec, socket, &opponent, 1, nominate_card.colors.unwrap().get(0).unwrap().as_ref())
+            }
+            // if opponent played nominate
+            else {
+                // get nominated color
+                let mut color_vec: Vec<String> = [].to_vec();
+                color_vec.push(game_state.lastNominateColor.clone().unwrap());
+
+                let nominate_decider: Card = Card {
+                    type_field: "number".to_string(),
+                    value: game_state.lastNominateAmount.clone(),
+                    colors: Option::from(color_vec),
+                    name: decider.name.clone(),
+                };
+                discard_loop(&nominate_decider, &opponent, socket);
+            }
+
         }
         _ => {
             println!("invalid card type received from server!");
@@ -76,6 +93,8 @@ pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
     }
 }
 
+/// controls if card could be played
+/// otherwise draw cards or play nope if already drew cards
 fn discard_loop(decider: &Card, opponent: &GamePlayer, socket: &RawClient) {
     unsafe {
         let play_successful = number_card(&decider, &cards::CARDS, &opponent, socket);
@@ -149,6 +168,7 @@ fn discard_cards(cards: Vec<Card>, socket: &RawClient, _opponent: &GamePlayer) {
     socket.emit("playAction", payload).expect("error in sending played cards");
 }
 
+/// controls which action should be played
 fn play_action(cards: Vec<Card>, socket: &RawClient, opponent: &GamePlayer) {
     match cards.get(0).unwrap().type_field.trim_end() {
         "reset" => {
@@ -165,6 +185,7 @@ fn play_action(cards: Vec<Card>, socket: &RawClient, opponent: &GamePlayer) {
     }
 }
 
+/// send nominate event to server
 fn play_nominate(cards: Vec<Card>, socket: &RawClient, opponent: &GamePlayer, nominate_amount: i32, nominated_color: &str) {
     println!("playing {:?}", cards);
     let action_body = NominateAction {
