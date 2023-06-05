@@ -39,7 +39,13 @@ pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
             println!("Received reset card!");
             let mut play_first: Vec<Card> = [].to_vec();
             play_first.push(cards::CARDS[0].clone());
-            discard_cards(play_first, socket, &opponent)
+            if play_first.get(0).unwrap().type_field == "number" {
+                discard_cards(play_first, socket, &opponent);
+            }
+            else {
+                play_action(play_first, socket, &opponent);
+            }
+
         }
         "invisible" => {
             println!("Received invis card!");
@@ -54,6 +60,14 @@ pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
         }
         "nominate" => {
             println!("Received nominate card!");
+
+            let nominate_decider: Card = Card {
+                type_field: "number".to_string(),
+                value: game_state.lastNominateAmount.clone(),
+                colors: decider.colors.clone(),
+                name: decider.name.clone(),
+            };
+            discard_loop(&nominate_decider, &opponent, socket);
         }
         _ => {
             println!("invalid card type received from server!");
@@ -84,7 +98,7 @@ fn discard_loop(decider: &Card, opponent: &GamePlayer, socket: &RawClient) {
 /// check if the card colour & amount is in hands
 /// send cards if successful
 fn number_card(decider: &Card, current_cards: &Vec<Card>, opponent: &GamePlayer, socket: &RawClient) -> bool {
-    println!("Received number card!");
+    println!("Playing number cards!");
     for decider_color in decider.colors.as_ref().unwrap() {
         let mut possible_cards: Vec<Card> = [].to_vec();
 
@@ -98,7 +112,7 @@ fn number_card(decider: &Card, current_cards: &Vec<Card>, opponent: &GamePlayer,
             }
         }
 
-        if possible_cards.len() >= (decider.value.unwrap()) as usize {
+        if possible_cards.len() >= (decider.value.expect("Something went wrong unwrapping decider value")) as usize {
             let action_names: Vec<String> = ["reset".to_string(), "invisible".to_string(), "nominate".to_string()].to_vec();
             unsafe{
                 cards::TOOK_CARDS = false;

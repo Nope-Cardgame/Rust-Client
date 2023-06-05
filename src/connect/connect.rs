@@ -125,6 +125,8 @@ pub fn create_game(token: &Token, no_action_cards: Option<bool>, no_wild_cards: 
         invitationTimeout: None,
         startWithRejection: None,
         playerAmount: None,
+        lastNominateAmount: None,
+        lastNominateColor: None,
     };
 
     // create client for HTTP request

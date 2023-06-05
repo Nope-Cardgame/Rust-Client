@@ -15,7 +15,7 @@ pub struct Game {
     pub players: Option<Vec<GamePlayer>>,
     pub tournament: Option<Tournament>,
     pub gameRole: Option<String>,
-    pub encounterRound: Option<i64>,
+    pub encounterRound: Option<i32>,
     pub discardPile: Option<Vec<Card>>,
     pub lastAction: Option<Action>,
     pub currentPlayer: Option<GamePlayer>,
@@ -27,6 +27,8 @@ pub struct Game {
     pub invitationTimeout: Option<i32>,
     pub startWithRejection: Option<bool>,
     pub playerAmount: Option<i32>,
+    pub lastNominateAmount: Option<i32>,
+    pub lastNominateColor: Option<String>,
 }
 
 #[serde_with::skip_serializing_none]
@@ -35,20 +37,20 @@ pub struct Game {
 pub struct GamePlayer {
     pub username: String,
     pub socketId: Option<String>,
-    pub cardAmount: Option<i64>,
+    pub cardAmount: Option<i32>,
     pub disqualified: Option<bool>,
     pub accepted: Option<bool>,
     pub cards: Option<Vec<Card>>,
-    pub ranking: Option<i64>,
+    pub ranking: Option<i32>,
 }
 
 #[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TournamentPlayer {
     pub username: Option<String>,
-    pub ranking: Option<i64>,
+    pub ranking: Option<i32>,
     pub disqualified: bool,
-    pub score: Option<i64>,
+    pub score: Option<i32>,
 }
 
 #[serde_with::skip_serializing_none]
@@ -82,7 +84,7 @@ pub struct TournamentMode {
 pub struct Card {
     #[serde(rename = "type")]
     pub type_field: String,
-    pub value: Option<i64>,
+    pub value: Option<i32>,
     pub colors: Option<Vec<String>>,
     pub name: Option<String>,
 }
@@ -92,7 +94,7 @@ pub struct Card {
 pub struct WildCard {
     #[serde(rename = "type")]
     pub type_field: String,
-    pub value: Option<i64>,
+    pub value: Option<i32>,
     pub color: Vec<String>,
     pub name: Option<String>,
 }
@@ -113,11 +115,12 @@ pub struct Action {
     #[serde(rename = "type")]
     pub type_field: String,
     pub explanation: Option<String>,
-    pub cardAmount: Option<i64>,
+    pub cardAmount: Option<i32>,
     pub cards: Option<Vec<Card>>,
     pub player: Option<GamePlayer>,
     pub nominatedPlayer: Option<GamePlayer>,
     pub nominatedColor: Option<String>,
+    pub nominatedAmount: Option<i32>,
 }
 
 #[serde_with::skip_serializing_none]
