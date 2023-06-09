@@ -149,9 +149,22 @@ pub fn tournament_invite_callback(payload: Payload, socket: RawClient) {
 pub fn tournament_end_callback(payload: Payload, _socket: RawClient) {
     match payload {
         Payload::String(str) => {
-            println!("tournamentEnd Received: {}", str);
+            println!("tournamentEnd Received: {}\n\n", str.clone());
             unsafe{
                 current_game::TOURNEY_FINISHED = true;
+            }
+            let tournament:Tournament = serde_json::from_str(&str).unwrap();
+
+            for participant in tournament.participants.unwrap() {
+                let rank = participant.clone().ranking.clone().unwrap_or(-1);
+                let mut _rank_str = "".to_string();
+                if rank == -1 {
+                    _rank_str = "disqualified".to_string();
+                }
+                else {
+                    _rank_str = "rank ".to_string() + rank.to_string().as_str();
+                }
+                println!("Player {} got {}!", participant.clone().username.clone().unwrap(), _rank_str);
             }
         },
         Payload::Binary(bin_data) => println!("Received bytes: {:#?}", bin_data),

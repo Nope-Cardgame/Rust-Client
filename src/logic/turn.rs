@@ -1,6 +1,6 @@
 use rust_socketio::RawClient;
 use serde_json::json;
-use crate::logic::game_objects::{Card, DiscardAction, Game, GamePlayer, NominateAction, NopeAction, TakeAction};
+use crate::logic::game_objects::{Card, DiscardAction, Game, GamePlayer, NominateAction, NominateActionMulti, NopeAction, TakeAction};
 
 pub mod cards {
     use crate::logic::game_objects::Card;
@@ -14,23 +14,27 @@ pub mod cards {
 pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
     cards::CARDS = [].to_vec();
     let players = game_state.clone().players.unwrap();
-    let opponent = players.get(1).unwrap().clone();
+    let mut opponent = players.get(1).unwrap().clone();
 
     for player in  players {
         if player.username == dotenvy::var("AUTH_USER").expect("error retrieving username from .env - create_game()") {
             cards::CARDS = player.cards.unwrap();
         }
+        else if player.clone().cardAmount.unwrap() > 0 {
+            opponent = player;
+        }
+
     }
 
     // get the first card of the discard pile and regard is as the deciding card
     let discard_pile = game_state.clone().discardPile.unwrap();
-    let mut decider = discard_pile.get(0).unwrap();
+    let mut decider = discard_pile.get(0).unwrap().clone();
 
     // match the decider type
     match decider.type_field.trim_end() {
         // search if hand has the right cards
         "number" => {
-            discard_loop(decider, &opponent, socket);
+            discard_loop(&decider, &opponent, socket);
         }
 
         // action cards section
@@ -51,12 +55,29 @@ pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
         }
         "invisible" => {
             println!("Received invis card!");
+            // if invis card is not only card on discard pile, check what is underneath
             if discard_pile.len() > 1 {
-                decider = discard_pile.get(1).unwrap();
-                discard_loop(decider, &opponent, socket);
+                let decider_index = check_invis_amount(discard_pile.clone());
+                decider = discard_pile.get(decider_index).unwrap().clone();
+
+                if decider.clone().type_field == "number"{
+                    discard_loop(&decider, &opponent, socket);
+                }
+                else {
+                    action_under_invis(decider, discard_pile.clone(),game_state , &opponent, socket);
+                }
+
             }
+            // otherwise invis is decider color with value 1
             else {
-                discard_loop(decider, &opponent, socket);
+                let topcard = discard_pile.get(0).unwrap();
+                decider = Card {
+                    type_field: topcard.type_field.clone(),
+                    value: Option::from(1),
+                    colors: topcard.colors.clone(),
+                    name: topcard.name.clone(),
+                };
+                discard_loop(&decider, &opponent, socket);
             }
 
         }
@@ -64,17 +85,30 @@ pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
             println!("Received nominate card!");
 
             // if nominate is first card in game
-            if discard_pile.len() == 1 {
+            if discard_pile.len() == 1 && game_state.clone().state.clone().unwrap() == "nominate_flipped" {
                 let nominate_card = discard_pile.get(0).unwrap().clone();
                 let mut card_vec: Vec<Card> = [].to_vec();
                 card_vec.push(nominate_card.clone());
-                play_nominate(card_vec, socket, &opponent, 1, nominate_card.colors.unwrap().get(0).unwrap().as_ref())
+
+                if nominate_card.clone().colors.unwrap().len() > 1 {
+                    play_nominate_multi(None, socket, &opponent, 1, nominate_card.colors.unwrap().get(0).unwrap().as_ref())
+                }
+                else {
+                    play_nominate(None, socket, &opponent, 1)
+                }
             }
             // if opponent played nominate
             else {
                 // get nominated color
                 let mut color_vec: Vec<String> = [].to_vec();
-                color_vec.push(game_state.lastNominateColor.clone().unwrap());
+
+                if discard_pile.get(0).unwrap().clone().colors.unwrap().len() > 1 {
+                    color_vec.push(game_state.lastNominateColor.clone().unwrap());
+                }
+                else {
+                    color_vec.push(discard_pile.get(0).unwrap().clone().colors.unwrap().get(0).unwrap().clone())
+                }
+
 
                 let nominate_decider: Card = Card {
                     type_field: "number".to_string(),
@@ -84,6 +118,69 @@ pub unsafe fn ai_turn(game_state: &Game, socket: &RawClient) {
                 };
                 discard_loop(&nominate_decider, &opponent, socket);
             }
+        }
+        _ => {
+            println!("invalid card type received from server!");
+        }
+
+    }
+}
+
+/// checks for the first non inis card under one or multiple invis cards
+fn check_invis_amount(discard_pile: Vec<Card>) -> usize {
+    let mut index = 0;
+    'check_loop: for (card_index, card) in discard_pile.iter().enumerate() {
+        if card.type_field.trim_end() == "invisible" {
+            index = card_index;
+        }
+        else {
+            break 'check_loop;
+        }
+    }
+
+    return index + 1;
+}
+
+/// special action decider if action card was under invis card(s)
+fn action_under_invis(decider: Card, discard_pile: Vec<Card>, game_state: &Game, opponent: &GamePlayer, socket: &RawClient) {
+    match decider.clone().type_field.trim_end() {
+
+        "reset" => unsafe {
+            println!("Received reset card!");
+
+            // just take first available card
+            let mut play_first: Vec<Card> = [].to_vec();
+            play_first.push(cards::CARDS[0].clone());
+            if play_first.get(0).unwrap().type_field == "number" {
+                discard_cards(play_first, socket, &opponent);
+            }
+            else {
+                play_action(play_first, socket, &opponent);
+            }
+
+        }
+
+        // nominate block doesn't need special consideration as normal loop, as it can only be at least the second card in discard pile
+        "nominate" => {
+            println!("Received nominate card!");
+
+            let mut color_vec: Vec<String> = [].to_vec();
+
+            if discard_pile.get(0).unwrap().clone().colors.unwrap().len() > 1 {
+                color_vec.push(game_state.lastNominateColor.clone().unwrap());
+            }
+            else {
+                color_vec.push(discard_pile.get(0).unwrap().clone().colors.unwrap().get(0).unwrap().clone())
+            }
+
+
+            let nominate_decider: Card = Card {
+                type_field: "number".to_string(),
+                value: game_state.lastNominateAmount.clone(),
+                colors: Option::from(color_vec),
+                name: decider.name.clone(),
+            };
+            discard_loop(&nominate_decider, &opponent, socket);
 
         }
         _ => {
@@ -118,6 +215,7 @@ fn discard_loop(decider: &Card, opponent: &GamePlayer, socket: &RawClient) {
 /// send cards if successful
 fn number_card(decider: &Card, current_cards: &Vec<Card>, opponent: &GamePlayer, socket: &RawClient) -> bool {
     println!("Playing number cards!");
+    println!("Current decider: {:?}", &decider);
     for decider_color in decider.colors.as_ref().unwrap() {
         let mut possible_cards: Vec<Card> = [].to_vec();
 
@@ -178,21 +276,29 @@ fn play_action(cards: Vec<Card>, socket: &RawClient, opponent: &GamePlayer) {
             discard_cards(cards, socket, opponent);
         }
         "nominate" => {
-            let color = &cards.get(0).as_ref().unwrap().colors.as_ref().unwrap().get(0).unwrap();
-            play_nominate(cards.clone(), socket, opponent, 1, color)
+            // let color = &cards.get(0).as_ref().unwrap().colors.as_ref().unwrap().get(0).unwrap();
+
+            if cards.clone().get(0).clone().unwrap().colors.clone().unwrap().len() > 1 {
+                play_nominate_multi(Option::from(cards.clone()), socket, &opponent, 1,
+                                    cards.clone().get(0).clone().unwrap().colors.clone().unwrap().get(0).unwrap().as_ref())
+            }
+            else {
+                play_nominate(Option::from(cards.clone()), socket, &opponent, 1)
+            }
+            // play_nominate_multi(cards.clone(), socket, opponent, 1, color)
         }
         _ => println!("something went wrong in play_action")
     }
 }
 
-/// send nominate event to server
-fn play_nominate(cards: Vec<Card>, socket: &RawClient, opponent: &GamePlayer, nominate_amount: i32, nominated_color: &str) {
-    println!("playing {:?}", cards);
-    let action_body = NominateAction {
+/// send nominate event from multi-color nominate card to server
+fn play_nominate_multi(cards_to_send: Option<Vec<Card>>, socket: &RawClient, opponent: &GamePlayer, nominate_amount: i32, nominated_color: &str) {
+    println!("playing {:?}", cards_to_send);
+    let action_body = NominateActionMulti {
         type_field: "nominate".to_string(),
-        explanation: "playing a nominate card!".to_string(),
+        explanation: "playing a multi-color nominate card!".to_string(),
         amount: None,
-        cards: Option::from(cards),
+        cards: cards_to_send,
         player: None,
         nominatedPlayer: Option::from(opponent.clone()),
         nominatedAmount: Option::from(nominate_amount),
@@ -200,7 +306,27 @@ fn play_nominate(cards: Vec<Card>, socket: &RawClient, opponent: &GamePlayer, no
     };
 
     let payload = json!(&action_body);
-    println!("sending nominate card: {}", &payload);
+    println!("sending multi-color nominate card: {}", &payload);
+
+    socket.emit("playAction", payload).expect("error in sending played cards");
+}
+
+/// send nominate event to server
+fn play_nominate(cards_to_send: Option<Vec<Card>>, socket: &RawClient, opponent: &GamePlayer, nominate_amount: i32) {
+
+    println!("playing {:?}", cards_to_send);
+    let action_body = NominateAction {
+        type_field: "nominate".to_string(),
+        explanation: "playing a single color nominate card!".to_string(),
+        amount: None,
+        cards: cards_to_send,
+        player: None,
+        nominatedPlayer: Option::from(opponent.clone()),
+        nominatedAmount: Option::from(nominate_amount),
+    };
+
+    let payload = json!(&action_body);
+    println!("sending single-color nominate card: {}", &payload);
 
     socket.emit("playAction", payload).expect("error in sending played cards");
 }
