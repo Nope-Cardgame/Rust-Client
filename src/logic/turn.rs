@@ -229,11 +229,15 @@ fn number_card(decider: &Card, current_cards: &Vec<Card>, opponent: &GamePlayer,
             }
         }
 
+
+
         if possible_cards.len() >= (decider.value.expect("Something went wrong unwrapping decider value")) as usize {
             let action_names: Vec<String> = ["reset".to_string(), "invisible".to_string(), "nominate".to_string()].to_vec();
             unsafe{
                 cards::TOOK_CARDS = false;
             }
+
+            possible_cards.sort_by(|a, b| b.colors.as_ref().unwrap().len().cmp(&a.colors.as_ref().unwrap().len()));
 
             for card in &possible_cards {
                 if action_names.contains(&card.type_field) {
@@ -252,7 +256,16 @@ fn number_card(decider: &Card, current_cards: &Vec<Card>, opponent: &GamePlayer,
 }
 
 /// internal function to send play cards event
-fn discard_cards(cards: Vec<Card>, socket: &RawClient, _opponent: &GamePlayer) {
+fn discard_cards(mut cards: Vec<Card>, socket: &RawClient, _opponent: &GamePlayer) {
+    // if opponent has many cards, sort in ascending order, to keep high value cards
+    // if opponent.cardAmount.unwrap() > 4 {
+    //     cards.sort_by(|a, b| a.value.unwrap().cmp(&b.value.unwrap()));
+    // }
+    // // if opponent has 4 or fewer cards, sort in descending order to keep low value cards
+    // else {
+        cards.sort_by(|a, b| b.value.unwrap().cmp(&a.value.unwrap()));
+    // }
+
     println!("playing {:?}", cards);
     let action_body = DiscardAction {
         type_field: "discard".to_string(),
@@ -276,14 +289,25 @@ fn play_action(cards: Vec<Card>, socket: &RawClient, opponent: &GamePlayer) {
             discard_cards(cards, socket, opponent);
         }
         "nominate" => {
-            // let color = &cards.get(0).as_ref().unwrap().colors.as_ref().unwrap().get(0).unwrap();
+            let mut nom_amount = 1;
+            println!("{:?}", opponent);
+
+            if !(opponent.disqualified.as_ref().unwrap()) && !&(opponent.cardAmount.as_ref().unwrap() == &0) {
+                if opponent.cardAmount.as_ref().unwrap() > &6 {
+                    nom_amount = 3
+                }
+                else if opponent.cardAmount.as_ref().unwrap() > &3 {
+                    nom_amount = 2
+                }
+            }
+
 
             if cards.clone().get(0).clone().unwrap().colors.clone().unwrap().len() > 1 {
-                play_nominate_multi(Option::from(cards.clone()), socket, &opponent, 1,
+                play_nominate_multi(Option::from(cards.clone()), socket, &opponent, nom_amount,
                                     cards.clone().get(0).clone().unwrap().colors.clone().unwrap().get(0).unwrap().as_ref())
             }
             else {
-                play_nominate(Option::from(cards.clone()), socket, &opponent, 1)
+                play_nominate(Option::from(cards.clone()), socket, &opponent, nom_amount)
             }
             // play_nominate_multi(cards.clone(), socket, opponent, 1, color)
         }

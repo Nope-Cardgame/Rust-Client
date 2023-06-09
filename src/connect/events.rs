@@ -1,7 +1,7 @@
 use std::io::stdin;
 use rust_socketio::{Payload, RawClient};
 use serde_json::json;
-use crate::logic::game_objects::{Eliminated, Game, Ready, Tournament};
+use crate::logic::game_objects::{Eliminated, Game, Ready, Tournament, TournamentPlayer};
 use crate::logic::turn::ai_turn;
 
 
@@ -154,17 +154,21 @@ pub fn tournament_end_callback(payload: Payload, _socket: RawClient) {
                 current_game::TOURNEY_FINISHED = true;
             }
             let tournament:Tournament = serde_json::from_str(&str).unwrap();
+            let mut participants: Vec<TournamentPlayer> = tournament.participants.unwrap();
+            let playercount = participants.clone().len() as i32;
+            participants.sort_by(|a, b| a.ranking.unwrap_or(playercount.clone()).cmp(&b.ranking.unwrap_or(playercount)));
 
-            for participant in tournament.participants.unwrap() {
+            for participant in participants {
+                print!("Player {} got ", participant.clone().username.clone().unwrap());
                 let rank = participant.clone().ranking.clone().unwrap_or(-1);
-                let mut _rank_str = "".to_string();
+
                 if rank == -1 {
-                    _rank_str = "disqualified".to_string();
+                    println!("disqualified!");
                 }
                 else {
-                    _rank_str = "rank ".to_string() + rank.to_string().as_str();
+                    println!("rank {} with {} points!", rank, participant.score.unwrap());
                 }
-                println!("Player {} got {}!", participant.clone().username.clone().unwrap(), _rank_str);
+
             }
         },
         Payload::Binary(bin_data) => println!("Received bytes: {:#?}", bin_data),
