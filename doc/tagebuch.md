@@ -33,7 +33,9 @@
 | 09.06.2023 | Weiterführende Logik eingebaut - mögliche Karten werden herausgefiltert und dann absteigend nach Farbanzahl sortiert -> höhere Chance nope!-Runden zu spielen                            |                 2h |
 | 09.06.2023 | Am Nachmittag Testturniere für alle Gruppen organisiert um letzte Fehler auszumerzen                                                                                                     |                 4h |
 | 09.06.2023 | Turnier                                                                                                                                                                                  |              90min |
-|            |                                                                                                                                                                                          |           56h35min |
+|            |                                                                                                                                                                                          |                    |
+| 13.06.2023 | Dokumentation - anlegen technischer Dokumentation                                                                                                                                        |              30min |
+|            |                                                                                                                                                                                          |           57h05min |
 
 
 Insgesamt ist der Projektdurchlauf sehr gut gelungen.

@@ -1,10 +1,11 @@
 # Nope - KI Spieler (_Rust_)
 
-Kurze Beschreibung des Repos und der übergreifenden Schnittstelle für die unterschiedlichen Clients.
+Dieses Repo beinhaltet einen in Rust geschriebenen Gameclient des Kartenspiel "Nope!" für das Softwareprojekt Sommersemester 2023.
+
 
 
 ## Dokumentation
-[Link zum Doku-Ordner](https://github.com/Nope-Cardgame/Repo-Template/Doku-Ordner)
+[Link zum Doku-Ordner](doc)
 
 
 ## Mitglieder
