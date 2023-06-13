@@ -257,19 +257,12 @@ fn number_card(decider: &Card, current_cards: &Vec<Card>, opponent: &GamePlayer,
 
 /// internal function to send play cards event
 fn discard_cards(mut cards: Vec<Card>, socket: &RawClient, _opponent: &GamePlayer) {
-    // if opponent has many cards, sort in ascending order, to keep high value cards
-    // if opponent.cardAmount.unwrap() > 4 {
-    //     cards.sort_by(|a, b| a.value.unwrap().cmp(&b.value.unwrap()));
-    // }
-    // // if opponent has 4 or fewer cards, sort in descending order to keep low value cards
-    // else {
-        cards.sort_by(|a, b| b.value.unwrap().cmp(&a.value.unwrap()));
-    // }
+    cards.sort_by(|a, b| b.value.unwrap().cmp(&a.value.unwrap()));
 
     println!("playing {:?}", cards);
     let action_body = DiscardAction {
         type_field: "discard".to_string(),
-        explanation: "playing first available cards".to_string(),
+        explanation: "playing first available cards, sorted multicolor first".to_string(),
         cards: Option::from(cards),
     };
 
