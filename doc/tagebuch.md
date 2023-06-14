@@ -35,7 +35,8 @@
 | 09.06.2023 | Turnier                                                                                                                                                                                  |              90min |
 |            |                                                                                                                                                                                          |                    |
 | 13.06.2023 | Dokumentation - anlegen technischer Dokumentation                                                                                                                                        |              30min |
-|            |                                                                                                                                                                                          |           57h05min |
+| 14.06.2023 | Dokumentation weiter ausgearbeitet                                                                                                                                                       |                 2h |
+|            |                                                                                                                                                                                          |           59h05min |
 
 
 Insgesamt ist der Projektdurchlauf sehr gut gelungen.
