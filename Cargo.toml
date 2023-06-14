@@ -10,6 +10,7 @@ rust_socketio = { version = "0.4.1"}
 futures-util = "0.3.28"
 
 serde = "1.0.160"
+serde_with = "3.0.0"
 
 # crate that enables json parsing
 serde_json = "1.0.95"

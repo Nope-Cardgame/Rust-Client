@@ -1,10 +1,11 @@
 # Nope - KI Spieler (_Rust_)
 
-Kurze Beschreibung des Repos und der übergreifenden Schnittstelle für die unterschiedlichen Clients.
+Dieses Repo beinhaltet einen in Rust geschriebenen Gameclient des Kartenspiel "Nope!" für das Softwareprojekt Sommersemester 2023.
+
 
 
 ## Dokumentation
-[Link zum Doku-Ordner](https://github.com/Nope-Cardgame/Repo-Template/Doku-Ordner)
+[Link zum Doku-Ordner](doc)
 
 
 ## Mitglieder
@@ -31,10 +32,11 @@ Erklärung wie das Projekt ausgeführt wird
 
 1. Sicherstellen, dass rustc und cargo installiert sind. [Anleitung](https://www.rust-lang.org/tools/install)
 2. Klonen des GitHub-Repo
-3. `cargo build` ausführen ODER `rustc main.rs` ausführen 
+3. `cargo build --release` ausführen 
 4. Ausführen des Programms
-   - `./rust-client` auf Linux / Mac
-   - `.\rust-client.exe` auf Windows
+   - `./target/release/rust-client` auf Linux / Mac
+   - `.\target\release\rust-client.exe` auf Windows
+   - alternativ ausführbare Datei per GUI ansteuern und ausführen
 
 
 ## Benutzung

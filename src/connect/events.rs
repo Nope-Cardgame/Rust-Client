@@ -1,8 +1,8 @@
 use std::io::stdin;
 use rust_socketio::{Payload, RawClient};
 use serde_json::json;
-use crate::logic::game_objects::{Eliminated, Game, Ready, Tournament};
-use crate::logic::turn::basic_turn;
+use crate::logic::game_objects::{Eliminated, Game, Ready, Tournament, TournamentPlayer};
+use crate::logic::turn::ai_turn;
 
 
 /// this module contains some static variables deciding game flow
@@ -33,7 +33,7 @@ pub fn game_state_callback(payload: Payload, socket: RawClient) {
             // socket.io received new game state, if this client is the player for the current turn, calculate turn
             if game_state.currentPlayer.as_ref().unwrap().username == dotenvy::var("AUTH_USER").expect("error retrieving username from .env - create_game()"){
                 unsafe{
-                    basic_turn(&game_state, &socket);
+                    ai_turn(&game_state, &socket);
                 }
             }
         },
@@ -46,11 +46,11 @@ pub fn game_state_callback(payload: Payload, socket: RawClient) {
 pub fn eliminated_callback(payload: Payload, _socket: RawClient) {
     match payload {
         Payload::String(str) => {
-            println!("eliminated Received: {}", str);
+            println!("\n\neliminated Received: {}", str);
             let eliminated_result = serde_json::from_str(&str);
             let eliminated: Eliminated = eliminated_result.unwrap();
             if !eliminated.disqualified {
-                println!("You sadly lost the round. No more cards on your hand!");
+                println!("You sadly lost the round. No more cards on your hand!\n\n");
             }
 
 
@@ -149,9 +149,26 @@ pub fn tournament_invite_callback(payload: Payload, socket: RawClient) {
 pub fn tournament_end_callback(payload: Payload, _socket: RawClient) {
     match payload {
         Payload::String(str) => {
-            println!("tournamentEnd Received: {}", str);
+            println!("tournamentEnd Received: {}\n\n", str.clone());
             unsafe{
                 current_game::TOURNEY_FINISHED = true;
+            }
+            let tournament:Tournament = serde_json::from_str(&str).unwrap();
+            let mut participants: Vec<TournamentPlayer> = tournament.participants.unwrap();
+            let playercount = participants.clone().len() as i32;
+            participants.sort_by(|a, b| a.ranking.unwrap_or(playercount.clone()).cmp(&b.ranking.unwrap_or(playercount)));
+
+            for participant in participants {
+                print!("Player {} got ", participant.clone().username.clone().unwrap());
+                let rank = participant.clone().ranking.clone().unwrap_or(-1);
+
+                if rank == -1 {
+                    println!("disqualified!");
+                }
+                else {
+                    println!("rank {} with {} points!", rank, participant.score.unwrap());
+                }
+
             }
         },
         Payload::Binary(bin_data) => println!("Received bytes: {:#?}", bin_data),
