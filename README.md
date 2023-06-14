@@ -32,10 +32,11 @@ Erklärung wie das Projekt ausgeführt wird
 
 1. Sicherstellen, dass rustc und cargo installiert sind. [Anleitung](https://www.rust-lang.org/tools/install)
 2. Klonen des GitHub-Repo
-3. `cargo build` ausführen ODER `rustc main.rs` ausführen 
+3. `cargo build --release` ausführen 
 4. Ausführen des Programms
-   - `./rust-client` auf Linux / Mac
-   - `.\rust-client.exe` auf Windows
+   - `./target/release/rust-client` auf Linux / Mac
+   - `.\target\release\rust-client.exe` auf Windows
+   - alternativ ausführbare Datei per GUI ansteuern und ausführen
 
 
 ## Benutzung
