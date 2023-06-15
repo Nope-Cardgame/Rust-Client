@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 // this file contains all Game Object structs
 // structs are defined in a way, that serde_json can autotransform from a json string
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct Game {
@@ -14,7 +15,7 @@ pub struct Game {
     pub players: Option<Vec<GamePlayer>>,
     pub tournament: Option<Tournament>,
     pub gameRole: Option<String>,
-    pub encounterRound: Option<i64>,
+    pub encounterRound: Option<i32>,
     pub discardPile: Option<Vec<Card>>,
     pub lastAction: Option<Action>,
     pub currentPlayer: Option<GamePlayer>,
@@ -26,30 +27,33 @@ pub struct Game {
     pub invitationTimeout: Option<i32>,
     pub startWithRejection: Option<bool>,
     pub playerAmount: Option<i32>,
+    pub lastNominateAmount: Option<i32>,
+    pub lastNominateColor: Option<String>,
 }
 
-
-
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct GamePlayer {
     pub username: String,
     pub socketId: Option<String>,
-    pub cardAmount: Option<i64>,
+    pub cardAmount: Option<i32>,
     pub disqualified: Option<bool>,
     pub accepted: Option<bool>,
     pub cards: Option<Vec<Card>>,
-    pub ranking: Option<i64>,
+    pub ranking: Option<i32>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TournamentPlayer {
     pub username: Option<String>,
-    pub ranking: Option<i64>,
+    pub ranking: Option<i32>,
     pub disqualified: bool,
-    pub score: Option<i64>,
+    pub score: Option<i32>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct Tournament {
@@ -67,6 +71,7 @@ pub struct Tournament {
     pub gameAmount: Option<i32>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct TournamentMode {
@@ -74,24 +79,27 @@ pub struct TournamentMode {
     pub numberOfRounds: Option<i32>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Card {
     #[serde(rename = "type")]
     pub type_field: String,
-    pub value: Option<i64>,
+    pub value: Option<i32>,
     pub colors: Option<Vec<String>>,
     pub name: Option<String>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WildCard {
     #[serde(rename = "type")]
     pub type_field: String,
-    pub value: Option<i64>,
+    pub value: Option<i32>,
     pub color: Vec<String>,
     pub name: Option<String>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CardNominate {
     #[serde(rename = "type")]
@@ -100,19 +108,22 @@ pub struct CardNominate {
     pub name: Option<String>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct Action {
     #[serde(rename = "type")]
     pub type_field: String,
     pub explanation: Option<String>,
-    pub cardAmount: Option<i64>,
+    pub cardAmount: Option<i32>,
     pub cards: Option<Vec<Card>>,
     pub player: Option<GamePlayer>,
     pub nominatedPlayer: Option<GamePlayer>,
     pub nominatedColor: Option<String>,
+    pub nominatedAmount: Option<i32>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct DiscardAction {
@@ -122,6 +133,7 @@ pub struct DiscardAction {
     pub cards: Option<Vec<Card>>,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct NopeAction {
@@ -137,6 +149,35 @@ pub struct TakeAction {
     #[serde(rename = "type")]
     pub type_field: String,
     pub explanation: String,
+}
+
+#[serde_with::skip_serializing_none]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct NominateActionMulti {
+    #[serde(rename = "type")]
+    pub type_field: String,
+    pub explanation: String,
+    pub amount: Option<i32>,
+    pub cards: Option<Vec<Card>>,
+    pub player: Option<GamePlayer>,
+    pub nominatedPlayer: Option<GamePlayer>,
+    pub nominatedAmount: Option<i32>,
+    pub nominatedColor: Option<String>
+}
+
+#[serde_with::skip_serializing_none]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct NominateAction {
+    #[serde(rename = "type")]
+    pub type_field: String,
+    pub explanation: String,
+    pub amount: Option<i32>,
+    pub cards: Option<Vec<Card>>,
+    pub player: Option<GamePlayer>,
+    pub nominatedPlayer: Option<GamePlayer>,
+    pub nominatedAmount: Option<i32>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

@@ -120,7 +120,7 @@ fn single_game(mut socket: Client, jsontkn: &Token) -> Client{
 
 /// internal function to create game
 fn single_game_create(socket: Client, jsontkn: &Token) -> Client {
-    create_game(jsontkn, Some(true), Some(true), Some(false));
+    create_game(jsontkn, Some(false), Some(false), Some(false));
     return socket;
 }
 
